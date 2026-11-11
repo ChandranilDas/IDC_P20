@@ -1,6 +1,6 @@
 # Independent web-app acceptance audit
 
-Status: redesigned app independently accepted locally on 2026-11-11, pending final publishing checks. Antigravity authored app changes; Codex tested actual browser runs, mounted components, scientific exports, and protected assets. GitHub repository and Vercel project have been created; upload and deployment are pending.
+Status: redesigned app independently accepted locally on 2026-11-11, pending final publishing checks. Antigravity authored app changes; Codex tested actual browser runs, mounted components, scientific exports, and protected assets. GitHub source has been pushed and Vercel deployment is READY at https://idc-p20.vercel.app. Repository integration is connected.
 
 The redesigned notebook layout uses a square 2D physical plot, shared drawing/pointer bounds, top workspace transport controls, darker informative labels and keyboard focus. Missing or failed audit evidence cannot silently pass; spectral fits are descriptive. The original evidence regressions and two additional missing-field failures were reproduced and resolved. All four views fit a 390px viewport; wide validation tables scroll within their panels.
 
@@ -25,4 +25,6 @@ The previous Complete_Project.zip is a portable copy of the research deliverable
 
 ## Redesign release checks
 
-Production-built browser completed 1D t=40 and 2D t=25; rerun/pause/resume/reset/geometry changes were exercised. Independent exported2D energy differs by1.82e-12, mean by2.08e-17; CSV contains168 records; PNG is valid1008x894. Core parity,11 invalid-input cases and worker stale-message/pause tests pass again. Dataset arrays remain bitwise equal to originalNPZ and18 protected researchfiles unchanged.
+Production-built browser completed 1D t=40 and 2D t=25; rerun/pause/resume/reset/geometry changes were exercised. Independent exported 2D energy differs by1.82e-12, mean by2.08e-17; CSV contains 168 records; PNG is valid 1008x894. Core parity, 11 invalid-input cases and worker stale-message/pause tests pass again. Dataset arrays remain bitwise equal to original NPZ and 18 protected research files unchanged.
+
+GitHub Actions run 42959041267 passed both scientific and web jobs for commit e5a3d807c39792a9233d24eb2cbed1e7af1ba7f7. Vercel cloud build completed READY and assigned https://idc-p20.vercel.app. Remote application content was not fetched; local production-build interactions and cloud build status provide the verification evidence.

@@ -6,6 +6,10 @@ $$\partial_t\phi=\phi-\phi^3+\nabla^2\phi.$$
 
 Antigravity produced the numerical implementation. Codex independently audited the equations, discretization, saved fields, diagnostics and deliverables, and corrected issues found during review. The allocation image and two professor-provided papers are the project sources. There is no external dataset.
 
+[Live laboratory](https://idc-p20.vercel.app) · [GitHub source](https://github.com/ChandranilDas/IDC_P20) · [CV summary](docs/PORTFOLIO.md)
+
+![Saved 2D reference simulation in the laboratory](docs/images/laboratory-preview.png)
+
 ## Start here
 
 - [Four-page technical report](docs/P20_Technical_Report.pdf)

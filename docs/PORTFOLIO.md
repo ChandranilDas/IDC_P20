@@ -1,6 +1,6 @@
 # P20 — TDGL numerical laboratory
 
-Source: [ChandranilDas/IDC_P20](https://github.com/ChandranilDas/IDC_P20). Live application link will be added after deployment completes.
+Source: [ChandranilDas/IDC_P20](https://github.com/ChandranilDas/IDC_P20). Live application: [idc-p20.vercel.app](https://idc-p20.vercel.app).
 
 ## Suggested CV entry
 

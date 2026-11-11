@@ -126,3 +126,9 @@ Project P20: 1D & 2D Time-Dependent Ginzburg–Landau (TDGL) Numerical Simulatio
 • Validated numerical accuracy across 1.81 million replayed integration steps (0 free energy violations above 10⁻⁹), confirming quadratic spatial convergence (p = 1.99), first-order temporal convergence (p = 0.9986), and descriptive finite-window spectral scaling fits (k⁻²·⁰⁶ in 1D, k⁻³·⁰² in 2D matching Porod tails).
 • Engineered an interactive static web application (React, TypeScript, Vite) featuring non-blocking Web Worker integration (Float64Array), live physical diagnostics, an interactive finite-difference inspector, and lazy-loaded Float64 binary datasets exported from audited Python simulations.
 ```
+
+## Published links
+
+- [Live laboratory](https://idc-p20.vercel.app)
+- [Source repository](https://github.com/ChandranilDas/IDC_P20)
+- [CV summary and verification evidence](../docs/PORTFOLIO.md)
