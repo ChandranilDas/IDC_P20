@@ -1,0 +1,33 @@
+{
+  "tdgl_1d_random": {
+    "shape": [
+      504,
+      1024
+    ],
+    "bitwise_equal": true,
+    "timestamps_equal": true,
+    "provenance_matches": true
+  },
+  "tdgl_2d_random": {
+    "shape": [
+      101,
+      128,
+      128
+    ],
+    "bitwise_equal": true,
+    "timestamps_equal": true,
+    "provenance_matches": true
+  },
+  "tdgl_1d_kink_antikink": {
+    "shape": [
+      9,
+      1024
+    ],
+    "bitwise_equal": true,
+    "timestamps_equal": true,
+    "provenance_matches": true
+  },
+  "protected_research_files": {
+    "unchanged": 18
+  }
+}

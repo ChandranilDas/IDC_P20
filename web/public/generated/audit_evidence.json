@@ -1,0 +1,260 @@
+{
+  "validation_summary": {
+    "fixed_points": {
+      "fixed_point_plus1": {
+        "max_residual": 0.0,
+        "max_step_change": 0.0,
+        "is_stationary": true
+      },
+      "fixed_point_minus1": {
+        "max_residual": 0.0,
+        "max_step_change": 0.0,
+        "is_stationary": true
+      },
+      "unstable_point_zero": {
+        "epsilon_initial": 0.01,
+        "mean_after_t0.5": 0.016481681454476264,
+        "expected_linear": 0.01648721270700128,
+        "growth_ratio": 1.6481681454476262,
+        "is_unstable": true
+      }
+    },
+    "kink_convergence": {
+      "evaluation_domain": "Interior region [0.2*L, 0.8*L] (eliminating boundary wrap artifact)",
+      "N_list": [
+        128,
+        256,
+        512,
+        1024,
+        2048
+      ],
+      "dx": [
+        0.46875,
+        0.234375,
+        0.1171875,
+        0.05859375,
+        0.029296875
+      ],
+      "l2_errors": [
+        0.0036227533082152977,
+        0.0009311353663603859,
+        0.00023385178346629242,
+        5.8506503574884054e-05,
+        1.4638283223668484e-05
+      ],
+      "linf_errors": [
+        0.016964042371392485,
+        0.004495055577229179,
+        0.0011655892300718174,
+        0.00029197203530101357,
+        7.302899530764462e-05
+      ],
+      "p_l2": 1.989471479830743,
+      "p_linf": 1.9664026638547067
+    },
+    "directional_derivative": {
+      "1D_relative_mismatch": 1.8080300870306375e-10,
+      "1D_passed": true,
+      "2D_relative_mismatch": 1.0953254916372056e-08,
+      "2D_passed": true
+    },
+    "temporal_convergence": {
+      "dt1": 0.002,
+      "err1": 1.220071242991061e-05,
+      "dt2": 0.001,
+      "err2": 5.779348594470157e-06,
+      "measured_order": 1.0779865957334207,
+      "expected_order": 1.0
+    },
+    "fourier_eigenmode_2d": {
+      "max_eigenvalue_residual": 3.8191672047105385e-13,
+      "exact_eigenvalue": -6.780025273258914,
+      "continuum_eigenvalue": -6.853891945200942,
+      "passed": true
+    },
+    "free_energy_1d": {
+      "monotonic": true,
+      "max_increase": -5.4633630952594103e-11,
+      "num_violations": 0,
+      "total_drop": 28.091098907761626
+    },
+    "free_energy_2d": {
+      "monotonic": true,
+      "max_increase": -1.1856533621148628,
+      "num_violations": 0,
+      "total_drop": 3600.294404357036
+    },
+    "stability": {
+      "linear_stability_criteria": {
+        "1D": {
+          "L": 100.0,
+          "N": 1024,
+          "dx": 0.09765625,
+          "dt_used": 0.001,
+          "dt_max": 0.004745742120169784,
+          "safety_ratio": 0.2107152,
+          "is_stable": true
+        },
+        "2D": {
+          "L": 128.0,
+          "Nx": 128,
+          "Ny": 128,
+          "dx": 1.0,
+          "dt_used": 0.01,
+          "dt_max": 0.2,
+          "safety_ratio": 0.049999999999999996,
+          "is_stable": true
+        }
+      },
+      "unstable_demonstration": {
+        "dt_unstable": 0.007118613180254675,
+        "dt_max": 0.004745742120169784,
+        "over_ratio": 1.5,
+        "exploded": true,
+        "step_exploded": 12
+      }
+    },
+    "spectra": {
+      "description": "Porod fits computed on hardened step fields; fit stderr reflects regression-only uncertainty assuming uncorrelated residuals.",
+      "1D_fit": {
+        "exponent": -2.0638341736869825,
+        "stderr": 0.2906609395969535,
+        "amplitude": 0.0017504347225540656,
+        "r_squared": 0.6685093710382198,
+        "num_points": 27,
+        "k_min": 0.1,
+        "k_max": 1.8
+      },
+      "1D_theoretical_porod": -2.0,
+      "2D_fit": {
+        "exponent": -3.0219533590647147,
+        "stderr": 0.06570925467126554,
+        "amplitude": 8.626275172352976e-06,
+        "r_squared": 0.991561413800308,
+        "num_points": 20,
+        "k_min": 0.15,
+        "k_max": 1.5
+      },
+      "2D_theoretical_porod": -3.0
+    }
+  },
+  "independent_full_replay": {
+    "tdgl_1d_random": {
+      "steps": 1000000,
+      "max_energy_increase": -9.947598300641403e-14,
+      "energy_violations_above_1e-9": 0,
+      "max_saved_field_discrepancy": 2.4908720919203375e-12,
+      "final_energy": -19.344051078645474,
+      "finite": true,
+      "elapsed_seconds": 26.61055695899995,
+      "passed": true
+    },
+    "tdgl_2d_random": {
+      "steps": 10000,
+      "max_energy_increase": -0.02091667636702088,
+      "energy_violations_above_1e-9": 0,
+      "max_saved_field_discrepancy": 2.6645352591003757e-15,
+      "final_energy": -3579.6072409016074,
+      "finite": true,
+      "elapsed_seconds": 4.725403709002421,
+      "passed": true
+    },
+    "tdgl_1d_kink_antikink": {
+      "steps": 800000,
+      "max_energy_increase": 3.552713678800501e-15,
+      "energy_violations_above_1e-9": 0,
+      "max_saved_field_discrepancy": 1.4294294914396488e-13,
+      "final_energy": -25.0,
+      "finite": true,
+      "elapsed_seconds": 18.32462433299952,
+      "passed": true
+    }
+  },
+  "independent_temporal_convergence": {
+    "1D": {
+      "dt": [
+        0.02,
+        0.01,
+        0.005,
+        0.0025
+      ],
+      "max_errors": [
+        0.0024350932419655025,
+        0.0012196222499369358,
+        0.0006103208924407855,
+        0.0003052867279460525
+      ],
+      "fitted_order": 0.9986015210509227,
+      "passed": true
+    },
+    "2D": {
+      "dt": [
+        0.02,
+        0.01,
+        0.005,
+        0.0025
+      ],
+      "max_errors": [
+        0.0024350932419655025,
+        0.0012196222499369358,
+        0.0006103208924407855,
+        0.0003052867279460525
+      ],
+      "fitted_order": 0.9986015210509227,
+      "passed": true
+    }
+  },
+  "spectral_fits": {
+    "1D_hardened": {
+      "exponent": -2.0638341736869825,
+      "stderr": 0.2906609395969535,
+      "amplitude": 0.0017504347225540656,
+      "r_squared": 0.6685093710382198,
+      "num_points": 27,
+      "k_min": 0.1,
+      "k_max": 1.8
+    },
+    "2D_hardened_modal": {
+      "exponent": -3.0219533590647147,
+      "stderr": 0.06570925467126554,
+      "amplitude": 8.626275172352976e-06,
+      "r_squared": 0.991561413800308,
+      "num_points": 20,
+      "k_min": 0.15,
+      "k_max": 1.5
+    },
+    "interpretation": "Descriptive single-realization fits. stderr is regression-only; it excludes seed, window and discretization uncertainty."
+  },
+  "kink_convergence_table": [
+    {
+      "N": 128,
+      "dx": 0.46875,
+      "l2": 0.003622753,
+      "linf": 0.01696404
+    },
+    {
+      "N": 256,
+      "dx": 0.234375,
+      "l2": 0.0009311354,
+      "linf": 0.004495056
+    },
+    {
+      "N": 512,
+      "dx": 0.117188,
+      "l2": 0.0002338518,
+      "linf": 0.001165589
+    },
+    {
+      "N": 1024,
+      "dx": 0.058594,
+      "l2": 5.85065e-05,
+      "linf": 0.000291972
+    },
+    {
+      "N": 2048,
+      "dx": 0.029297,
+      "l2": 1.463828e-05,
+      "linf": 7.3029e-05
+    }
+  ]
+}

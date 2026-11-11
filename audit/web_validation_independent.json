@@ -1,0 +1,99 @@
+[
+  {
+    "name": "valid",
+    "expected_valid": true,
+    "actual_valid": true,
+    "passed": true,
+    "errors": []
+  },
+  {
+    "name": "huge_bias",
+    "expected_valid": false,
+    "actual_valid": false,
+    "passed": true,
+    "errors": [
+      "Initial order parameter |φ₀| cannot exceed 1.0 (physical double-well domain bounds)."
+    ]
+  },
+  {
+    "name": "fraction_grid",
+    "expected_valid": false,
+    "actual_valid": false,
+    "passed": true,
+    "errors": [
+      "Grid size N must be an exact integer (no silent decimal truncation)."
+    ]
+  },
+  {
+    "name": "fraction_seed",
+    "expected_valid": false,
+    "actual_valid": false,
+    "passed": true,
+    "errors": [
+      "Random seed must be an exact integer (no silent decimal truncation)."
+    ]
+  },
+  {
+    "name": "nonfinite_dt",
+    "expected_valid": false,
+    "actual_valid": false,
+    "passed": true,
+    "errors": [
+      "Timestep Δt must be a finite number."
+    ]
+  },
+  {
+    "name": "oversized_work",
+    "expected_valid": false,
+    "actual_valid": false,
+    "passed": true,
+    "errors": [
+      "Computational budget exceeded: 12,800,000,000,000,000,000,000,000 cell-steps requested (limit is 50,000,000 for live browser worker). Decrease duration or increase Δt/grid spacing."
+    ]
+  },
+  {
+    "name": "blank_seed",
+    "expected_valid": false,
+    "actual_valid": false,
+    "passed": true,
+    "errors": [
+      "Random seed must be an integer without suffixes, decimal points, or whitespace."
+    ]
+  },
+  {
+    "name": "trailing_L",
+    "expected_valid": false,
+    "actual_valid": false,
+    "passed": true,
+    "errors": [
+      "System size L must be a valid finite number without suffix characters."
+    ]
+  },
+  {
+    "name": "out_of_range_seed",
+    "expected_valid": false,
+    "actual_valid": false,
+    "passed": true,
+    "errors": [
+      "Random seed must be an unsigned 32-bit integer in [0, 4294967295]."
+    ]
+  },
+  {
+    "name": "overflow_geometry",
+    "expected_valid": false,
+    "actual_valid": false,
+    "passed": true,
+    "errors": [
+      "Inverse squared grid spacing is non-finite."
+    ]
+  },
+  {
+    "name": "unstable_dt",
+    "expected_valid": false,
+    "actual_valid": false,
+    "passed": true,
+    "errors": [
+      "Timestep Δt = 1 exceeds conservative monotonicity bound Δt_max = 0.189509 for M = 1.00 (derived from dF/dt ≤ 0 with 3M²-1). Decrease Δt."
+    ]
+  }
+]

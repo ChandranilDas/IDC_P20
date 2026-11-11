@@ -1,0 +1,5 @@
+{
+  "snapshots_during_first_two_time_units": 40,
+  "no_ticks_after_pause": true,
+  "stale_reset_ignored": true
+}

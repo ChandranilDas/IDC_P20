@@ -1,0 +1,587 @@
+/* ==========================================================================
+   TDGL Simulation Web Laboratory — Scientific Field Notebook Design System
+   Restrained editorial aesthetic: warm paper, near-black ink, fine hairlines,
+   and deep forest accents. No glossy shadows, pill oceans, or SaaS templates.
+   ========================================================================== */
+
+:root {
+  /* Paper & Ink Palette */
+  --bg-page: #f5f3ed;
+  --bg-surface: #ffffff;
+  --bg-subtle: #eeece4;
+  --bg-hover: #e5e2d6;
+
+  --ink-primary: #20241f;
+  --ink-secondary: #484e45;
+  --ink-muted: #545a50;
+  --ink-faint: #8a9085;
+
+  --border-hairline: #d8d8cd;
+  --border-subtle: #e5e5dc;
+  --border-dark: #b8b8a9;
+
+  /* Primary Accent: Deep Forest */
+  --forest: #315646;
+  --forest-hover: #264436;
+  --forest-faint: #eaf0ec;
+
+  /* Restrained Contextual Tones */
+  --warn-bg: #faf5eb;
+  --warn-border: #e2d3b3;
+  --warn-text: #735118;
+  --error-bg: #faefec;
+  --error-border: #e8c4bc;
+  --error-text: #8c2d19;
+  --info-bg: #edf3f7;
+  --info-border: #c8d9e6;
+  --info-text: #204b6e;
+
+  /* Typography */
+  --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Radii & Boundaries */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--forest);
+  outline-offset: 2px;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--bg-page);
+  color: var(--ink-primary);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings */
+h1, h2, h3, h4 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  color: var(--ink-primary);
+  letter-spacing: -0.01em;
+}
+
+/* Base interactive elements */
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+input, select {
+  font-family: var(--font-sans);
+  font-size: 0.825rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--ink-primary);
+  outline: none;
+  transition: border-color 0.12s ease;
+  min-width: 0;
+}
+
+input:focus, select:focus {
+  border-color: var(--forest);
+  box-shadow: 0 0 0 1px var(--forest);
+}
+
+input:disabled, select:disabled {
+  background: var(--bg-subtle);
+  color: var(--ink-muted);
+  cursor: not-allowed;
+}
+
+/* Layout Container */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Header */
+.app-header {
+  background: var(--bg-page);
+  border-bottom: 1px solid var(--border-hairline);
+  padding: 0.75rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+.brand-section {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.brand-wordmark {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ink-primary);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.brand-desc {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* Plain text navigation with underline indicator */
+.nav-tabs {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.nav-tab {
+  background: transparent;
+  color: var(--ink-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.5rem 0.15rem;
+  border-bottom: 2px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  border-radius: 0;
+}
+
+.nav-tab:hover {
+  color: var(--ink-primary);
+}
+
+.nav-tab.active {
+  color: var(--forest);
+  font-weight: 600;
+  border-bottom: 2px solid var(--forest);
+}
+
+/* Main Workspace */
+.app-main {
+  flex: 1;
+  padding: 1.5rem 2rem;
+  max-width: 1380px;
+  margin: 0 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Simulation Lab Two-Column Responsive Layout */
+.lab-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+  width: 100%;
+}
+
+.lab-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.lab-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+/* Primary Transport Toolbar */
+.lab-transport-toolbar {
+  margin-bottom: 0.25rem;
+}
+
+/* Responsive Stage for 1D Line and 2D Square Domain */
+.field-stage {
+  width: 100%;
+  position: relative;
+}
+
+.field-stage-1d {
+  height: 360px;
+}
+
+.field-stage-2d {
+  height: clamp(380px, 50vw, 540px);
+}
+
+@media (max-width: 640px) {
+  .field-stage-2d {
+    height: 380px;
+  }
+}
+
+/* Editorial Notebook Surfaces */
+.notebook-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+  min-width: 0;
+}
+
+.notebook-panel-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border-hairline);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.notebook-panel-title {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.notebook-panel-subtitle {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 0.825rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.12s ease;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--forest);
+  color: #ffffff;
+  border: 1px solid var(--forest);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--forest-hover);
+  border-color: var(--forest-hover);
+}
+
+.btn-secondary {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hairline);
+  color: var(--ink-primary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--bg-subtle);
+  border-color: var(--border-dark);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-hairline);
+  color: var(--ink-secondary);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: var(--bg-subtle);
+  color: var(--ink-primary);
+}
+
+.btn-sm {
+  padding: 0.25rem 0.55rem;
+  font-size: 0.75rem;
+}
+
+/* Form Groups & Parameter Controls */
+.param-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.param-group:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.param-label {
+  font-size: 0.75rem;
+  color: var(--ink-secondary);
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+}
+
+.param-hint {
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+}
+
+/* Mathematical Equation Ledger / Worksheet Table */
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.ledger-table th {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.ledger-table td {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--ink-primary);
+}
+
+.ledger-table tr:last-child td {
+  border-bottom: none;
+}
+
+.ledger-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8rem;
+}
+
+/* Status & Warning Banners */
+.notice-box {
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.notice-warning {
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  color: var(--warn-text);
+}
+
+.notice-error {
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  color: var(--error-text);
+}
+
+.notice-info {
+  background: var(--info-bg);
+  border: 1px solid var(--info-border);
+  color: var(--info-text);
+}
+
+.notice-success {
+  background: var(--forest-faint);
+  border: 1px solid #c2dbcd;
+  color: #1f4233;
+}
+
+/* Provenance Disclosure */
+.provenance-disclosure {
+  border: 1px solid var(--border-hairline);
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.9rem;
+  font-size: 0.8rem;
+}
+
+.provenance-disclosure summary {
+  cursor: pointer;
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+  user-select: none;
+  outline: none;
+}
+
+.provenance-disclosure summary:hover {
+  color: var(--forest);
+}
+
+/* Legacy Card compatibility helper */
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+  min-width: 0;
+}
+
+.card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border-hairline);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.card-title {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.stat-pill {
+  padding: 0.35rem 0.5rem;
+  background: var(--bg-subtle);
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-subtle);
+}
+
+.stat-label {
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.stat-val {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+  color: var(--ink-primary);
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-hairline);
+  background: var(--bg-subtle);
+  color: var(--ink-secondary);
+}
+
+.badge-teal, .badge-green {
+  background: var(--forest-faint);
+  border-color: #c2dbcd;
+  color: var(--forest);
+}
+
+/* Footer */
+.app-footer {
+  background: var(--bg-page);
+  border-top: 1px solid var(--border-hairline);
+  padding: 1rem 2rem;
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* Responsive Behavior */
+@media (max-width: 1100px) {
+  .brand-desc {
+    display: none;
+  }
+}
+
+/* Maintain two columns down to 760px; only collapse when space genuinely runs out */
+@media (max-width: 760px) {
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+  }
+  .brand-desc {
+    display: none;
+  }
+  .nav-tabs {
+    gap: 0.75rem;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .app-main {
+    padding: 1rem;
+  }
+  .lab-layout {
+    grid-template-columns: 1fr;
+  }
+  /* On mobile: display field and primary controls before deep parameter rail */
+  .mobile-field-first {
+    display: flex;
+    flex-direction: column;
+  }
+  .mobile-field-first > .lab-workspace {
+    order: 1;
+  }
+  .mobile-field-first > .lab-sidebar {
+    order: 2;
+  }
+  .app-footer {
+    flex-direction: column;
+    gap: 0.4rem;
+    text-align: center;
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "tdgl_1d_random": {
+    "time_final": 1000.0,
+    "F_initial_corrected": 8.747047829116154,
+    "F_final_corrected": -19.34405107864547,
+    "mean_initial": -0.00021340079021104618,
+    "mean_final": -0.009087782681804824,
+    "mean_square_final": 0.8303387068379185,
+    "final_periodic_sign_changes": 6
+  },
+  "tdgl_2d_random": {
+    "time_final": 100.0,
+    "F_initial_corrected": 20.687163455428625,
+    "F_final_corrected": -3579.6072409016074,
+    "mean_initial": -0.00010509871393721298,
+    "mean_final": -0.18771236837289795,
+    "mean_square_final": 0.9060624963337007
+  },
+  "tdgl_1d_kink_antikink": {
+    "time_final": 800.0,
+    "F_initial_corrected": -23.115251402727143,
+    "F_final_corrected": -25.0,
+    "mean_initial": -0.86,
+    "mean_final": -0.9999999999999885,
+    "mean_square_final": 0.9999999999999765,
+    "final_periodic_sign_changes": 0
+  }
+}

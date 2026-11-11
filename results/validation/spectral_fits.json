@@ -1,0 +1,21 @@
+{
+  "1D_hardened": {
+    "exponent": -2.0638341736869825,
+    "stderr": 0.2906609395969535,
+    "amplitude": 0.0017504347225540656,
+    "r_squared": 0.6685093710382198,
+    "num_points": 27,
+    "k_min": 0.1,
+    "k_max": 1.8
+  },
+  "2D_hardened_modal": {
+    "exponent": -3.0219533590647147,
+    "stderr": 0.06570925467126554,
+    "amplitude": 8.626275172352976e-06,
+    "r_squared": 0.991561413800308,
+    "num_points": 20,
+    "k_min": 0.15,
+    "k_max": 1.5
+  },
+  "interpretation": "Descriptive single-realization fits. stderr is regression-only; it excludes seed, window and discretization uncertainty."
+}

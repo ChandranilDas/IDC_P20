@@ -1,0 +1,22 @@
+[
+  {
+    "view": "Simulation Lab",
+    "viewport": 390,
+    "scroll_width": 390
+  },
+  {
+    "view": "Saved Results",
+    "viewport": 390,
+    "scroll_width": 390
+  },
+  {
+    "view": "Validation",
+    "viewport": 390,
+    "scroll_width": 390
+  },
+  {
+    "view": "About",
+    "viewport": 390,
+    "scroll_width": 390
+  }
+]

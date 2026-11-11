@@ -1,0 +1,60 @@
+name: CI - P20 TDGL Simulation & Web Laboratory
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  python-test:
+    name: Python Scientific Audit & Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Pytest Test Suite
+        run: |
+          PYTHONPATH=. pytest tests/test_tdgl.py -v
+
+      - name: Run Implementation Audit Checks
+        run: |
+          PYTHONPATH=. python audit/check_implementation.py audit/implementation_checks.json
+
+  web-build:
+    name: Web TypeScript Typecheck, Vitest & Static Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install Web Dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Run Vitest Suite (vs Audited Python Fixtures)
+        working-directory: web
+        run: npm test
+
+      - name: Build Web Production Bundle
+        working-directory: web
+        run: npm run build
+

@@ -1,0 +1,36 @@
+{
+  "status": "passed",
+  "observed": {
+    "live_1d": "completed to t=40 with pause/resume before transition bug",
+    "saved_2d_final": {
+      "time": 100,
+      "free_energy": -3579.6072,
+      "mean": -0.1877,
+      "mean_square": 0.9061,
+      "periodic_inspector_matches_npz": true
+    },
+    "pair_final": {
+      "time": 800,
+      "mean": -1,
+      "mean_square": 1,
+      "actual_mean_square_points": 9
+    },
+    "saved_playback": "advanced through real frames",
+    "mobile_width": 390,
+    "mobile_scroll_width_all_four_views": 390,
+    "json_csv_export": "downloaded and parsed; matching energy, 1024 field points",
+    "png_export": "Blob PNG downloaded and verified"
+  },
+  "blockers": [],
+  "final": {
+    "web_tests": 63,
+    "web_test_files": 5,
+    "independent_mounted_tests": 7,
+    "python_tests": 13,
+    "clean_install": "pass, 0 vulnerabilities",
+    "production_build": "pass",
+    "production_run_again": "pass",
+    "production_console_errors": 0,
+    "preview_url": "http://127.0.0.1:4173/"
+  }
+}

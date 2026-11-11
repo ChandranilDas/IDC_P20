@@ -1,0 +1,32 @@
+{
+  "tdgl_1d_random": {
+    "steps": 1000000,
+    "max_energy_increase": -9.947598300641403e-14,
+    "energy_violations_above_1e-9": 0,
+    "max_saved_field_discrepancy": 2.4908720919203375e-12,
+    "final_energy": -19.344051078645474,
+    "finite": true,
+    "elapsed_seconds": 26.61055695899995,
+    "passed": true
+  },
+  "tdgl_2d_random": {
+    "steps": 10000,
+    "max_energy_increase": -0.02091667636702088,
+    "energy_violations_above_1e-9": 0,
+    "max_saved_field_discrepancy": 2.6645352591003757e-15,
+    "final_energy": -3579.6072409016074,
+    "finite": true,
+    "elapsed_seconds": 4.725403709002421,
+    "passed": true
+  },
+  "tdgl_1d_kink_antikink": {
+    "steps": 800000,
+    "max_energy_increase": 3.552713678800501e-15,
+    "energy_violations_above_1e-9": 0,
+    "max_saved_field_discrepancy": 1.4294294914396488e-13,
+    "final_energy": -25.0,
+    "finite": true,
+    "elapsed_seconds": 18.32462433299952,
+    "passed": true
+  }
+}

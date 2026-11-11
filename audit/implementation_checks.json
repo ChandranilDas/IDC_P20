@@ -1,0 +1,36 @@
+{
+  "energy_gradient_1d": {
+    "relative_error": 8.00085128704886e-09,
+    "passed": true
+  },
+  "periodic_fourier_1d": {
+    "max_error": 3.873787530193562e-14,
+    "passed": true
+  },
+  "energy_gradient_2d": {
+    "relative_error": 2.4657780949375272e-09,
+    "passed": true
+  },
+  "periodic_fourier_2d": {
+    "max_error": 1.4024010996605554e-14,
+    "passed": true
+  },
+  "tdgl_1d_random": {
+    "independent_steps": 1000,
+    "comparison_time": 1.0,
+    "snapshot_max_error": 1.734723475976807e-17,
+    "max_step_energy_increase": -4.657169007637454e-06,
+    "initial_energy_error": 0.0,
+    "all_saved_fields_finite": true,
+    "passed": true
+  },
+  "tdgl_2d_random": {
+    "independent_steps": 100,
+    "comparison_time": 1.0,
+    "snapshot_max_error": 1.3877787807814457e-17,
+    "max_step_energy_increase": -0.02091667636701644,
+    "initial_energy_error": 0.0,
+    "all_saved_fields_finite": true,
+    "passed": true
+  }
+}

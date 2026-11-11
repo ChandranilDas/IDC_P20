@@ -1,0 +1,18 @@
+{
+  "tdgl_1d_evolution": {
+    "frame_count": 101,
+    "first_middle_last_distinct": true,
+    "size": [
+      1050,
+      525
+    ]
+  },
+  "tdgl_2d_coarsening": {
+    "frame_count": 101,
+    "first_middle_last_distinct": true,
+    "size": [
+      675,
+      600
+    ]
+  }
+}

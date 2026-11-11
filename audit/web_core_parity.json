@@ -1,0 +1,31 @@
+[
+  {
+    "shape": [
+      11
+    ],
+    "rhs_error": 1.7763568394002505e-15,
+    "energy_error": 0,
+    "trajectory_error": 2.7755575615628914e-17,
+    "inspector_rhs_error": 2.220446049250313e-16
+  },
+  {
+    "shape": [
+      7,
+      9
+    ],
+    "rhs_error": 3.552713678800501e-15,
+    "energy_error": 1.4210854715202004e-14,
+    "trajectory_error": 1.1102230246251565e-16,
+    "inspector_rhs_error": 8.881784197001252e-16
+  },
+  {
+    "shape": [
+      4,
+      5
+    ],
+    "rhs_error": 4.440892098500626e-16,
+    "energy_error": 8.881784197001252e-16,
+    "trajectory_error": 2.7755575615628914e-17,
+    "inspector_rhs_error": 2.220446049250313e-16
+  }
+]

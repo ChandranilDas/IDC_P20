@@ -1,0 +1,14 @@
+{
+  "final_time": 25,
+  "field_shape": [
+    128,
+    128
+  ],
+  "energy_independent": -3226.8685272066596,
+  "energy_error": 1.8189894035458565e-12,
+  "mean_error": 2.0816681711721685e-17,
+  "mean_square_error": 3.3306690738754696e-16,
+  "csv_points": 168,
+  "csv_max_energy_increase": -0.31697299999999995,
+  "png_validated": "1636x720 PNG"
+}

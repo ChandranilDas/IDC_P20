@@ -1,0 +1,17 @@
+# Follow-up acceptance review
+
+The new `transitions.test.tsx` still does NOT mount SimulationLab or SavedResultsView: renderToString(InspectorCard), direct validator tests and manually reproduced slice guards cannot catch the actual event/effect race. Install @testing-library/react and jsdom as dev dependencies, use jsdom environment, mount actual SimulationLab with a controllable Worker mock, dispatch real preset and numeric input events, deliver INITIALIZED/TICK out of order, and assert config, field, inspector, diagnostics and exports stay associated. Test 1D->2D->1D, resize, reset, blank/fractional N and seed. Mount SavedResultsView with deferred mock fetch responses, switch datasets rapidly, resolve old/new responses out of order and ensure only selected run is rendered. Mount ErrorBoundary with a throwing child and actually click recovery.
+
+`computeDiagnostics` returning zero-valued metrics for an invalid field shape fabricates plausible physical evidence. Reject mismatches explicitly instead. Guard at view boundary; do not call the core with inconsistent inputs. Exact expected field length required, not length >= expected.
+
+Store displayed field with its config/runId/diagnostics atomically, or at least clear field and diagnostics before setting a new activeConfig and use a matching config/field invariant. SavedResultsView needs loaded buffer runId, not only length guard: old buffer can be long enough to slice with wrong new geometry. Suppress display unless selectedRunId matches bufferRunId.
+
+During ongoing raw-string edit browser error N is not defined; finish replacements and ensure build catches remaining undefined identifiers. Do not claim mounted tests while only rendering static fragments.
+
+At completed status, the visible Start button is enabled but handleStart only acts for idle/paused; clicking Start silently does nothing. Give completed state an explicit Run Again action that reinitializes then starts, or disable Start with clear reset guidance. Include this actual control in mounted tests. PNG Blob download now passes independently; completed live 2D JSON energy agrees with NumPy to 1.82e-12, CSV energy decreases across 168 saved records.
+
+On changing default 1D N from 1024 to 512, inspector input shows i=512 while label says 0..511. Clamp selected coordinates on geometry changes and ensure displayed indices match the actual inspected point (including periodic wrap behavior).
+
+Browser sequence N=512 -> select 1d_random -> immediate Start produced completed history starting at step200,t0.2 (201 records), losing t0. Export /Users/chanadranildas/Downloads/tdgl_1d_diagnostics_run_1794351569086.csv. May involve ongoing HMR, but add mounted regression that quick preset->Start always preserves INITIALIZED frame t=0 and correct configured run. Keep Start disabled until INIT acknowledgement, and ensure new config initialized exactly once; run IDs should be unique beyond Date.now collisions.
+
+Latest independent mounted audit (7 tests) now has 6 PASS, only completed-run control FAIL: after completed Start click, INIT is sent but after its INITIALIZED acknowledgement no START follows. The enabled button is still labeled Start, so a single click should actually run again after fresh initialization (or clearly label it Reset if it only resets and update test accordingly to verify explicit behavior). Preserve assertions for six already passing tests.
