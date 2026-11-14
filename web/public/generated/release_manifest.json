@@ -1,0 +1,22 @@
+{
+  "release": "2026-11-14-synchronized",
+  "reference_results": "/generated/reference_results.json",
+  "files": {
+    "/downloads/P20_Detailed_Report.pdf": {
+      "sha256": "8a4cda7e42b98f48411bd29cc2b9501283ac9a7d06ed41b0ef09b9f6763bf44b",
+      "bytes": 2582234
+    },
+    "/downloads/P20_Final.pptx": {
+      "sha256": "e36a72718b20d9fad2c1a596288cf95d6b83866e0e555c6bab2571cdfca91404",
+      "bytes": 489687
+    },
+    "/downloads/P20_Simulations.ipynb": {
+      "sha256": "25e2c1d0e02b3188b2ae77ac7907c7637aa87f23721bb2398ff86e34464a139f",
+      "bytes": 790252
+    },
+    "/downloads/P20_Detailed_Report.md": {
+      "sha256": "5ec2a54d774b0b017502cd29cb9c16ab09235c7a1f2c7c617799b4e2a5e025b9",
+      "bytes": 32426
+    }
+  }
+}

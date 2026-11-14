@@ -1,19 +1,49 @@
-.git
-/.venv
-/audit
-/docs
-/experiments
-/presentation
-/results
-/scripts
-/src
-/tests
-/*.pdf
-/Screenshot*
-**/__pycache__
-**/node_modules
-**/.env
-**/.env.*
-**/.vercel
-**/.DS_Store
-/web/dist
+# Environments & packages
+.venv/
+env/
+venv/
+node_modules/
+web/node_modules/
+web/dist/
+
+# Vercel & environment files
+.vercel/
+.env
+.env.*
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# System & IDE files
+.DS_Store
+.vscode/
+.idea/
+
+# Local build and preview caches
+presentation/build/
+presentation/regenerated/
+presentation/preview/
+
+# Source reference files (preserved locally for privacy & copyright)
+# Note: Verma et al. (PRE 2023) and Yadav et al. (PRE 2024) can be obtained via their official DOIs:
+# https://doi.org/10.1103/PhysRevE.107.034207 and https://doi.org/10.1103/PhysRevE.110.044130
+2023_Verma_PRE_coarsen.pdf
+2024_yadav_PRE.pdf
+Screenshot*
+docs/text_2023.txt
+docs/text_2024.txt
+
+# Local logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vercel
+
+# Local submission and historical copies are not deployment inputs.
+Project20/
+submission_history/
+.git/

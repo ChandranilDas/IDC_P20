@@ -1,3 +1,5 @@
+> Historical verification record. For the current synchronized release, see RELEASE_SYNC.md and ../results/reference_results.json.
+
 # Independent web-app acceptance audit
 
 Status: redesigned app independently accepted locally on 2026-11-11, pending final publishing checks. Antigravity authored app changes; Codex tested actual browser runs, mounted components, scientific exports, and protected assets. GitHub source has been pushed and Vercel deployment is READY at https://idc-p20.vercel.app. Repository integration is connected.

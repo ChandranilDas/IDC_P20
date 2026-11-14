@@ -106,7 +106,7 @@ export const DiagnosticsPlot: React.FC<DiagnosticsPlotProps> = ({
       <div className="notebook-panel-header">
         <div className="notebook-panel-title">Physical Diagnostics</div>
         <div style={{ fontSize: '0.72rem', color: 'var(--forest)', fontWeight: 500 }}>
-          dF/dt ≤ 0 Active
+          Model-A Relaxational Flow (∂φ/∂t = -δF/δφ)
         </div>
       </div>
 

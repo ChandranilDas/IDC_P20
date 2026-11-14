@@ -1,3 +1,5 @@
+> Historical verification record. For the current synchronized release, see RELEASE_SYNC.md and ../results/reference_results.json.
+
 # Remaining independent review, after first corrections
 
 1. SavedResultsView diagHistory still fabricates missing pair mean-square as 0 and extrema +/-1 for every diag time. Pair only has those metrics at nine snapshot times: create sparse computed field diagnostics for plots (or use curve-specific histories), keep true 801-point energy/mean history without invented values. Current selected-frame metrics are now correct.

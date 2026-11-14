@@ -1,0 +1,8 @@
+{
+  "dimension": 1,
+  "time": 40,
+  "field_error_vs_python_archive": 9.43689570931383e-16,
+  "browser_energy": -19.34405097134933,
+  "initial_source": "canonical archive",
+  "passed": true
+}

@@ -9,11 +9,21 @@
  * - Explicit Forward Euler time integration
  * - Exact forward-edge discrete Ginzburg-Landau free energy:
  *     F_discrete[φ] = ΔV ∑ [ -φ²/2 + φ⁴/4 + 0.5 * ∑ ((Δ⁺φ)/Δx_d)² ]
- * - Linear stability threshold (Yadav et al. 2024, Eq. 35):
- *     Δt_max = 1 / [ 1/Δx² + 1/Δy² + ... ] * ...
- * - Deterministic cross-browser Mulberry32 PRNG
+ * - Linear stability threshold (Yadav et al. 2024, PRE, Eq. 35):
+ *     Δt_linear = Δx² / (Δx² + 2d)
+ * - Sufficient monotonicity bound for discrete energy dissipation:
+ *     Δt_mono = 1 / [ (3M² - 1) + 2d/Δx² ]
+ * - Canonical NumPy PCG64 audited reference initial-condition fixtures (seed=42)
+ * - Deterministic cross-browser Mulberry32 PRNG for custom seeds/configs
  * - Mathematical inspector data computation for selected coordinates
  */
+
+import {
+  getCanonical1DInit,
+  getCanonical2DInit,
+  CANONICAL_METADATA_1D,
+  CANONICAL_METADATA_2D,
+} from './canonicalFixtures';
 
 export interface SimulationConfig {
   dimension: 1 | 2;
@@ -59,7 +69,10 @@ export interface InspectionData {
   predictedEulerVal: number;
 }
 
-/** Linear stability upper bound (Yadav et al. 2024, PRE, Eq. 35) */
+/**
+ * Linear stability upper bound around ordered states φ = ±1 (Yadav et al. 2024, PRE, Eq. 35):
+ *   Δt_lin = Δx² / (Δx² + 2d)
+ */
 export function getStabilityBound(dx: number, dimension: 1 | 2, dy?: number): number {
   if (dimension === 1) {
     return (dx * dx) / (dx * dx + 2.0);
@@ -68,6 +81,108 @@ export function getStabilityBound(dx: number, dimension: 1 | 2, dy?: number): nu
   const invSum = 1.0 / (dx * dx) + 1.0 / (actualDy * actualDy);
   // Linearization of -2*phi - 4*(invSum)
   return 1.0 / (1.0 + 2.0 * invSum);
+}
+
+export type InitialConditionSource =
+  | 'canonical_numpy_pcg64'
+  | 'mulberry32'
+  | 'analytic_uniform'
+  | 'analytic_kink_pair';
+
+export interface InitialConditionProvenance {
+  source: InitialConditionSource;
+  generator: string;
+  label: string;
+  description: string;
+  isCanonicalReference: boolean;
+  referenceFile?: string;
+  archiveSha256?: string;
+}
+
+/**
+ * Checks whether a configuration matches the audited canonical reference simulation:
+ * - 1D: L=100.0, N=1024, preset='random', seed=42, phi0=0.0, noiseAmplitude=0.05
+ * - 2D: L=128.0, Nx=128, Ny=128, preset='random', seed=42, phi0=0.0, noiseAmplitude=0.05
+ */
+export function isCanonicalReferenceConfig(cfg: SimulationConfig): boolean {
+  if (cfg.preset !== 'random') return false;
+  if (Math.trunc(cfg.seed) !== 42) return false;
+  if (Math.abs(cfg.phi0) > 1e-12) return false;
+  if (Math.abs(cfg.noiseAmplitude - 0.05) > 1e-12) return false;
+
+  if (cfg.dimension === 1) {
+    const N = cfg.Nx || cfg.N;
+    return Math.abs(cfg.L - 100.0) < 1e-9 && N === 1024;
+  } else {
+    return Math.abs(cfg.L - 128.0) < 1e-9 && cfg.Nx === 128 && cfg.Ny === 128;
+  }
+}
+
+/** Returns transparent scientific provenance metadata for the initial field */
+export function getInitialConditionProvenance(cfg: SimulationConfig): InitialConditionProvenance {
+  if (isCanonicalReferenceConfig(cfg)) {
+    const is1D = cfg.dimension === 1;
+    const meta = is1D ? CANONICAL_METADATA_1D : CANONICAL_METADATA_2D;
+    const dimLabel = is1D ? '1D (L=100, N=1024)' : '2D (L=128, 128×128)';
+    return {
+      source: 'canonical_numpy_pcg64',
+      generator: meta.generator,
+      label: `Canonical Reference Snapshot [${dimLabel}]`,
+      description: `Exact bitwise initial field from audited Python research archive (${meta.sourceArchive}). Generated via NumPy default_rng(seed=42) [PCG64]. Matches Python reference run at t=0.`,
+      isCanonicalReference: true,
+      referenceFile: meta.sourceArchive,
+      archiveSha256: meta.sourceSha256,
+    };
+  }
+
+  if (cfg.preset === 'plus1') {
+    return {
+      source: 'analytic_uniform',
+      generator: 'Analytic Uniform Ground State (φ = +1.0)',
+      label: 'Analytic Uniform (+1.0)',
+      description: 'Exact homogeneous broken-symmetry ground state φ(r) = +1.0 everywhere. Deterministic fixed point of the Model-A equation (∂φ/∂t = 0).',
+      isCanonicalReference: false,
+    };
+  }
+
+  if (cfg.preset === 'minus1') {
+    return {
+      source: 'analytic_uniform',
+      generator: 'Analytic Uniform Ground State (φ = -1.0)',
+      label: 'Analytic Uniform (-1.0)',
+      description: 'Exact homogeneous broken-symmetry ground state φ(r) = -1.0 everywhere. Deterministic fixed point of the Model-A equation (∂φ/∂t = 0).',
+      isCanonicalReference: false,
+    };
+  }
+
+  if (cfg.preset === 'kink_pair') {
+    const R0 = cfg.pairR0 ?? 7.0;
+    return {
+      source: 'analytic_kink_pair',
+      generator: `Analytic Kink–Antikink Pair Profile (R₀=${R0})`,
+      label: `Analytic Kink–Antikink Pair (R₀=${R0})`,
+      description: `Deterministic double-tanh profile: φ(x) = tanh((x - x₁)/√2) - tanh((x - x₂)/√2) - 1 with separation R₀ = ${R0}. Sampled paired-wall profile evolved with periodic indexing.`,
+      isCanonicalReference: false,
+    };
+  }
+
+  if (cfg.preset === 'biased') {
+    return {
+      source: 'mulberry32',
+      generator: `Mulberry32 PRNG (seed=${cfg.seed})`,
+      label: `Biased Mixture (Mulberry32, seed ${cfg.seed})`,
+      description: `Biased disordered quench with background φ₀ = ${cfg.phi0 || 0.2} and noise |δφ| ≤ ${cfg.noiseAmplitude} using deterministic Mulberry32 PRNG.`,
+      isCanonicalReference: false,
+    };
+  }
+
+  return {
+    source: 'mulberry32',
+    generator: `Mulberry32 PRNG (seed=${cfg.seed})`,
+    label: `Browser Mulberry32 PRNG (seed ${cfg.seed})`,
+    description: `Deterministic 32-bit PRNG for responsive cross-browser exploration. Note: seed ${cfg.seed} alone does NOT produce the canonical reference initial field when parameters, grid, or generators differ.`,
+    isCanonicalReference: false,
+  };
 }
 
 /** Deterministic 32-bit Mulberry32 PRNG (cross-browser reproducible) */
@@ -310,7 +425,16 @@ export function computeDiagnostics(
 
 /** Generate initial condition field */
 export function generateInitialCondition(cfg: SimulationConfig): Float64Array {
-  const total = cfg.dimension === 1 ? cfg.N : cfg.Nx * cfg.Ny;
+  const total = cfg.dimension === 1 ? (cfg.Nx || cfg.N) : cfg.Nx * cfg.Ny;
+
+  // Use authoritative canonical fixture if configuration matches research reference run
+  if (isCanonicalReferenceConfig(cfg)) {
+    const fixture = cfg.dimension === 1 ? getCanonical1DInit() : getCanonical2DInit();
+    if (fixture.length === total) {
+      return fixture.slice(); // Return defensive copy so mutations don't alter fixture
+    }
+  }
+
   const phi = new Float64Array(total);
   const rng = createPRNG(cfg.seed);
 

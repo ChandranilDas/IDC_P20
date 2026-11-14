@@ -1,3 +1,5 @@
+> Historical verification record. For the current synchronized release, see RELEASE_SYNC.md and ../results/reference_results.json.
+
 # Execution and verification record
 
 The numerical implementation was developed through the user's Antigravity session in IDC_P20. Codex independently inspected the supplied papers, reviewed the implementation and executed the independent checks and final workflow.

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Presentation, ExternalLink } from 'lucide-react';
+import { FileText, Presentation, ExternalLink, FileCode } from 'lucide-react';
 
 export const AboutView: React.FC = () => {
   return (
@@ -50,11 +50,20 @@ export const AboutView: React.FC = () => {
           ∇²φ(x_i, y_j) ≈ (φ_{`i+1,j`} - 2φ_{`i,j`} + φ_{`i-1,j`})/Δx² + (φ_{`i,j+1`} - 2φ_{`i,j`} + φ_{`i,j-1`})/Δy²
         </div>
         <p style={{ fontSize: '0.85rem', color: 'var(--ink-secondary)', marginTop: '0.5rem' }}>
-          Temporal integration proceeds via an explicit Forward Euler scheme. To avoid unphysical numerical oscillations
-          and blow-up across domain walls, the integration timestep is constrained by a conservative monotonicity bound:
+          Temporal integration proceeds via an explicit Forward Euler scheme. While continuous Model-A
+          relaxation mathematically satisfies monotonic free energy dissipation (<code>dF/dt = -∫ (δF/δφ)² dᵈr ≤ 0</code>),
+          explicit Euler discretizations do not guarantee unconditional energy decrease. To guarantee discrete energy decay,
+          the integration timestep is constrained by a conservative sufficient monotonicity bound:
         </p>
         <div style={{ background: 'var(--bg-subtle)', padding: '0.65rem 0.9rem', borderRadius: 'var(--radius-xs)', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', margin: '0.5rem 0' }}>
-          Δt ≤ 1 / [ 3M² - 1 + 2D/(Δx)² ], &nbsp; where &nbsp; M = max(1, |φ₀| + |δφ|)
+          Δt_mono ≤ 1 / [ (3M² - 1) + 2D/(Δx)² ], &nbsp; where &nbsp; M = max(1, |φ₀| + |δφ|)
+        </div>
+        <p style={{ fontSize: '0.85rem', color: 'var(--ink-secondary)', marginTop: '0.5rem' }}>
+          This sufficient monotonicity condition is strictly distinct from the ordered-state linear stability bound
+          derived by Yadav et al. (PRE 2024, Eq. 35) around the broken-symmetry ground states <code>φ = ±1</code>:
+        </p>
+        <div style={{ background: 'var(--bg-subtle)', padding: '0.65rem 0.9rem', borderRadius: 'var(--radius-xs)', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', margin: '0.5rem 0' }}>
+          Δt_linear ≤ (Δx)² / [ (Δx)² + 2D ]
         </div>
       </section>
 
@@ -112,21 +121,21 @@ export const AboutView: React.FC = () => {
       <section className="notebook-panel">
         <h2 style={{ fontSize: '1.1rem', marginBottom: '0.65rem' }}>4. Audited Deliverable Downloads</h2>
         <p style={{ fontSize: '0.85rem', color: 'var(--ink-secondary)', marginBottom: '0.75rem' }}>
-          Original audited reports and progress presentations produced during Project P20:
+          Current synchronized reports, presentation, and executable simulation notebook produced during Project P20:
         </p>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <a
-            href="/downloads/P20_Technical_Report.pdf"
-            download="P20_Technical_Report.pdf"
+            href="/downloads/P20_Detailed_Report.pdf"
+            download="P20_Detailed_Report.pdf"
             className="btn btn-secondary"
             style={{ textDecoration: 'none' }}
           >
             <FileText size={14} color="var(--forest)" />
-            <span>Technical Report (.pdf)</span>
+            <span>Detailed Report (.pdf)</span>
           </a>
           <a
-            href="/downloads/P20_Technical_Report.md"
-            download="P20_Technical_Report.md"
+            href="/downloads/P20_Detailed_Report.md"
+            download="P20_Detailed_Report.md"
             className="btn btn-secondary"
             style={{ textDecoration: 'none' }}
           >
@@ -134,18 +143,27 @@ export const AboutView: React.FC = () => {
             <span>Report Source (.md)</span>
           </a>
           <a
-            href="/downloads/P20_Progress_Presentation.pptx"
-            download="P20_TDGL_Progress_Presentation.pptx"
+            href="/downloads/P20_Final.pptx"
+            download="P20_Final.pptx"
             className="btn btn-secondary"
             style={{ textDecoration: 'none' }}
           >
             <Presentation size={14} color="var(--forest)" />
-            <span>Progress Presentation (.pptx)</span>
+            <span>Final Presentation (.pptx)</span>
+          </a>
+          <a
+            href="/downloads/P20_Simulations.ipynb"
+            download="P20_Simulations.ipynb"
+            className="btn btn-secondary"
+            style={{ textDecoration: 'none' }}
+          >
+            <FileCode size={14} color="var(--forest)" />
+            <span>Simulation Notebook (.ipynb)</span>
           </a>
         </div>
         <p style={{ fontSize: '0.72rem', color: 'var(--ink-muted)', marginTop: '0.65rem', fontStyle: 'italic' }}>
-          Notice: Download files provide our original audited project artifacts. In accordance with academic licensing,
-          the journal source articles (Verma et al. 2023, Yadav et al. 2024) are linked directly via their APS DOIs above.
+          Notice: Download files provide our current synchronized project artifacts (verifiable via <code>/generated/release_manifest.json</code>).
+          In accordance with academic licensing, the journal source articles (Verma et al. 2023, Yadav et al. 2024) are linked directly via their APS DOIs above.
         </p>
       </section>
 
@@ -159,12 +177,23 @@ export const AboutView: React.FC = () => {
             strictly on the interior sub-domain <code>[0.2L, 0.8L]</code>, while periodic defect annihilation is studied via kink–antikink pairs.
           </li>
           <li>
-            <strong>PRNG Differences:</strong> Live interactive browser simulations employ a deterministic 32-bit Mulberry32 algorithm for cross-browser reproducibility,
-            which generates distinct random initial fields from NumPy's <code>default_rng</code> (PCG64) used in the Python pipeline. Authoritative NumPy reference runs are preserved in the Saved Results view.
+            <strong>Initial Condition Provenance & PRNG Behavior:</strong> The default 1D (<code>L=100, N=1024</code>) and 2D (<code>L=128, 128×128</code>)
+            random quench presets are initialized from the exact bitwise canonical snapshots (<code>t=0</code>) of our audited Python research archives,
+            generated via NumPy's <code>default_rng(42)</code> (PCG64). Other configs and custom seeds utilize a deterministic 32-bit Mulberry32 PRNG
+            for responsive cross-browser exploration. Specifying seed 42 alone does <em>not</em> define the same initial field when other
+            configurations, grid dimensions, or generators are used.
           </li>
           <li>
-            <strong>Explicit Timestep Constraints:</strong> Explicit Forward Euler requires <code>Δt &lt; (Δx)² / 2D</code> to prevent diffusion instability.
-            For fine grids, this limits browser demo runs to <code>t ≤ 25–40</code> within a 50M cell-step budget.
+            <strong>Observation Window vs. Full Research Trajectories:</strong> In the live interactive Simulation Lab, default observation
+            endpoints are set to <code>t = 40</code> (1D) and <code>t = 25</code> (2D) to strictly observe the 50,000,000 cell-step browser compute budget
+            and limit total computation. The full project runs in Saved Results extend to <code>t = 1000</code> (1D)
+            and <code>t = 100</code> (2D) to inspect later morphologies and optional spectral diagnostics.
+          </li>
+          <li>
+            <strong>Explicit Timestep & Monotonicity Constraints:</strong> Explicit Forward Euler does not provide an unconditional nonlinear
+            energy dissipation guarantee. While the continuous Model-A equation satisfies <code>dF/dt ≤ 0</code> everywhere, discrete Euler
+            the app enforces <code>Δt ≤ 1 / [ (3M² - 1) + 2D/(Δx)² ]</code>, a conservative sufficient condition assuming the field remains within <code>|φ| ≤ M</code>, with <code>M ≥ 1</code> chosen from the initial amplitude. This differs from
+            the ordered-state linear stability bound <code>Δt &lt; (Δx)² / [ (Δx)² + 2D ]</code> (Yadav et al. 2024 Eq. 35).
           </li>
         </ul>
       </section>

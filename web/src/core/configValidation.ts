@@ -33,8 +33,11 @@ export interface WorkBudgetInfo {
   totalSteps: number;
   cellSteps: number;
   actualDuration: number;
-  stabilityLimit: number;
+  stabilityLimit: number; // Backward-compatible alias for sufficientMonotonicityLimit
   safetyRatio: number;
+  sufficientMonotonicityLimit: number; // Conservative sufficient bound for discrete energy dissipation
+  linearStabilityLimit: number;        // Ordered-state linear stability limit (Yadav et al. 2024 Eq. 35)
+  linearSafetyRatio: number;
 }
 
 export interface ValidationResult {
@@ -215,13 +218,17 @@ export function validateSimulationConfig(raw: RawConfigInput): ValidationResult 
   const M = Math.max(1.0, Math.abs(effectiveBias) + (raw.preset === 'random' || raw.preset === 'biased' ? eta : 0.0));
   // Conservative sufficient monotonicity limit: dt <= 1 / [ 3*M² - 1 + 2*D/dx² ]
   const denom = (3 * M * M - 1) + (2 * raw.dimension) * invDx2;
-  const stabilityLimit = 1.0 / denom;
+  const sufficientMonotonicityLimit = 1.0 / denom;
+  const linearStabilityLimit = (dx * dx) / (dx * dx + 2.0 * raw.dimension);
+  const stabilityLimit = sufficientMonotonicityLimit;
 
   if (dt > stabilityLimit) {
     errors.push(
-      `Timestep Δt = ${dt} exceeds conservative monotonicity bound Δt_max = ${stabilityLimit.toFixed(
+      `Timestep Δt = ${dt} exceeds conservative monotonicity bound Δt_mono = ${stabilityLimit.toFixed(
         6
-      )} for M = ${M.toFixed(2)} (derived from dF/dt ≤ 0 with 3M²-1). Decrease Δt.`
+      )} for M = ${M.toFixed(2)} (derived under field-amplitude assumption |φ| ≤ M with 3M²-1). Linear stability limit is Δt_lin = ${linearStabilityLimit.toFixed(
+        6
+      )} (Yadav et al. 2024 Eq. 35). Decrease Δt.`
     );
   }
 
@@ -244,6 +251,7 @@ export function validateSimulationConfig(raw: RawConfigInput): ValidationResult 
   }
 
   const safetyRatio = (dt / stabilityLimit) * 100;
+  const linearSafetyRatio = (dt / linearStabilityLimit) * 100;
 
   const config: SimulationConfig = {
     dimension: raw.dimension,
@@ -268,6 +276,9 @@ export function validateSimulationConfig(raw: RawConfigInput): ValidationResult 
     actualDuration,
     stabilityLimit,
     safetyRatio,
+    sufficientMonotonicityLimit,
+    linearStabilityLimit,
+    linearSafetyRatio,
   };
 
   return {

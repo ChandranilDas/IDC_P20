@@ -344,6 +344,39 @@ export const SavedResultsView: React.FC = () => {
           <span>Snapshots: <strong style={{ color: 'var(--ink-primary)' }}>{run.num_snapshots} frames</strong></span>
           <span style={{ marginLeft: 'auto', color: 'var(--forest)', fontWeight: 500 }}>✓ SHA-256 Verified</span>
         </div>
+
+        {/* Full Archive Duration & Generator Provenance Strip */}
+        <div
+          style={{
+            marginTop: '0.5rem',
+            padding: '0.45rem 0.75rem',
+            background: 'var(--bg-subtle)',
+            border: '1px solid var(--border-hairline)',
+            borderRadius: 'var(--radius-xs)',
+            fontSize: '0.72rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '0.5rem',
+          }}
+        >
+          <div>
+            <span style={{ fontWeight: 600, color: 'var(--ink-primary)' }}>
+              Full Research Trajectory (t = 0 → {run.t_snapshots[run.t_snapshots.length - 1]}):
+            </span>{' '}
+            <span style={{ color: 'var(--ink-secondary)' }}>
+              {run.id === 'tdgl_1d_random'
+                ? 'Full multi-decade coarsening across 1,000,000 steps (504 snapshots). Contrast with live interactive laboratory endpoint t = 40 (capped by 50M cell-steps budget).'
+                : run.id === 'tdgl_2d_random'
+                ? 'Full 2D domain growth across 10,000 steps (101 snapshots). Contrast with live interactive laboratory endpoint t = 25 (capped by 50M cell-steps budget).'
+                : 'Full defect annihilation trajectory resolving topological kink-antikink collapse.'}
+            </span>
+          </div>
+          <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--forest)', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
+            {run.seed !== undefined ? `NumPy default_rng(${run.seed}) [PCG64]` : 'Analytic IC'}
+          </div>
+        </div>
       </div>
 
       {/* Primary Workspace: Field Visualization FIRST */}

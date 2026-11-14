@@ -1,0 +1,70 @@
+{
+  "release": "2026-11-14-synchronized",
+  "model": "real scalar nonconserved Model A",
+  "equation": "phi_t = phi - phi^3 + laplacian(phi)",
+  "space": "periodic nearest-neighbor central differences",
+  "time": "forward Euler",
+  "energy": "unshifted potential plus forward-edge gradient squared, each edge once",
+  "runs": {
+    "tdgl_1d_random": {
+      "source_npz": "results/raw/tdgl_1d_random.npz",
+      "source_sha256": "828bc91f6ffaf544dea45acb4b7e1a2185a9ca208674e90136ce661b73d094a8",
+      "initial_field_sha256": "736e999d2a59744ed5e960ef22a540be595298345b890e45911627baaa0bf21f",
+      "dimension": 1,
+      "shape": [
+        1024
+      ],
+      "L": 100.0,
+      "dt": 0.001,
+      "t_final": 1000.0,
+      "steps": 1000000,
+      "mean": -0.009087782681804824,
+      "mean_abs": 0.8824038884198395,
+      "mean_square": 0.8303387068379185,
+      "mean_square_half": 0.4151693534189593,
+      "free_energy": -19.34405107864547,
+      "energy_density": -0.19344051078645472,
+      "periodic_sign_changes": 6
+    },
+    "tdgl_2d_random": {
+      "source_npz": "results/raw/tdgl_2d_random.npz",
+      "source_sha256": "b6de0b9e41fd6b56b517357f9f87c10e200f8cc2bf02a2c5e893f89c446598d9",
+      "initial_field_sha256": "edb66cc67d428791a12c303f6cb16580790a195b8e1a217e7f2f6830007fc6a8",
+      "dimension": 2,
+      "shape": [
+        128,
+        128
+      ],
+      "L": 128.0,
+      "dt": 0.01,
+      "t_final": 100.0,
+      "steps": 10000,
+      "mean": -0.18771236837289795,
+      "mean_abs": 0.9354388494349488,
+      "mean_square": 0.9060624963337007,
+      "mean_square_half": 0.45303124816685036,
+      "free_energy": -3579.6072409016074,
+      "energy_density": -0.218481887262061
+    },
+    "tdgl_1d_kink_antikink": {
+      "source_npz": "results/raw/tdgl_1d_kink_antikink.npz",
+      "source_sha256": "1aa8e047dd388b076773bcc1cb6f89fc364a6f1d0300b7c813331f12dab1d057",
+      "initial_field_sha256": "0cc9f7b75bec19ba1e53009e86efa3a249bb77c6e4c72ad857eac52f414b1bac",
+      "dimension": 1,
+      "shape": [
+        1024
+      ],
+      "L": 100.0,
+      "dt": 0.001,
+      "t_final": 800.0,
+      "steps": 800000,
+      "mean": -0.9999999999999885,
+      "mean_abs": 0.9999999999999885,
+      "mean_square": 0.9999999999999765,
+      "mean_square_half": 0.49999999999998823,
+      "free_energy": -25.0,
+      "energy_density": -0.25,
+      "periodic_sign_changes": 0
+    }
+  }
+}

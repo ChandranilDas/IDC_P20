@@ -12,14 +12,23 @@ Antigravity produced the numerical implementation. Codex independently audited t
 
 ## Start here
 
-- [Four-page technical report](docs/P20_Technical_Report.pdf)
+- [14-page detailed technical report](docs/P20_Technical_Report.pdf)
 - [Editable report text](docs/P20_Technical_Report.md)
-- [Five-slide visual progress presentation](presentation/P20_Progress_Presentation.pptx)
+- [Five-slide final presentation](presentation/P20_Progress_Presentation.pptx)
 - [1D animation](results/animations/tdgl_1d_evolution.gif)
 - [2D animation](results/animations/tdgl_2d_coarsening.gif)
 - [Source audit](docs/source_notes.md)
 - [Execution record](audit/EXECUTION_RECORD.md)
 - [Independent full replay](audit/independent_full_replay.json)
+
+## Synchronized release
+
+The report, final deck, executed notebook and app Saved Results use the same archived numerical fields. `results/reference_results.json` records their exact summaries and source hashes. `python scripts/sync_release.py --check` verifies current artifact copies. The web downloads match these current files.
+
+The app live reference presets use the archived seed-42 initial fields at the matching full reference geometries. Their default endpoints are shorter (t=40 / t=25) than the full archived runs (t=1000 / t=100). Other live configurations use the labelled browser generator. Compare runs at equal initial fields, grid, time step and time.
+
+- [Executed simulation notebook](notebooks/P20_Simulations.ipynb)
+- [Exact reference summaries](results/reference_results.json)
 
 ## Executed experiments
 
@@ -46,7 +55,7 @@ python -m pytest -q
 python experiments/run_all.py
 ```
 
-The final complete workflow was executed successfully; its log records 34.84 seconds on this machine. Runtime varies with hardware and installed versions. `audit/environment_freeze.txt` records the environment used.
+The full scientific pipeline was rerun successfully on 14 November 2026 in 37.56 seconds on this machine. Runtime varies with hardware and installed versions. `audit/environment_freeze.txt` records the environment used.
 
 The main pipeline runs both random quenches, the pair experiment, the interior kink residual comparison and validation, and regenerates plots and animations. Results are in `results/raw/`, `results/figures/`, `results/animations/` and `results/validation/`. The two GIFs each contain 101 frames; frame distinctness is checked in `audit/animation_checks.json`.
 
@@ -83,7 +92,7 @@ python docs/build_audited_report.py
 python presentation/build_plot_assets.py
 ```
 
-`presentation/build_progress_deck.mjs` builds and validates the delivered deck using the Codex bundled `@oai/artifact-tool` runtime. In a Codex environment, set `RUNTIME_NODE_MODULES`, `RUNTIME_PYTHON` and `CODEX_PRESENTATION_SKILL_DIR` to the paths returned by workspace dependency discovery, then run it with the bundled Node executable. It writes a new validated deck in `presentation/regenerated/`. The delivered PPTX can be edited directly in PowerPoint without this authoring runtime. The validation receipt is `audit/presentation_validation.json`; the deck was rendered and visually reviewed, but was not tested in native PowerPoint.
+`presentation/build_final_plot_assets.py` generates plots directly from the arrays. `presentation/build_final_deck.mjs` builds and validates the delivered deck using the Codex bundled `@oai/artifact-tool` runtime. In a Codex environment, set `RUNTIME_NODE_MODULES`, `RUNTIME_PYTHON` and `CODEX_PRESENTATION_SKILL_DIR` to the paths returned by workspace dependency discovery, then run it with the bundled Node executable. It writes a new validated deck in `presentation/regenerated/`. The delivered PPTX can be edited directly in PowerPoint without this authoring runtime. The validation receipt is `presentation/build/final_assets/deck-validation.json`; the deck was rendered and visually reviewed, but was not tested in native PowerPoint.
 
 ## Interpretation and limits
 

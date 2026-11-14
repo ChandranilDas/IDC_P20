@@ -3,3 +3,4 @@ matplotlib>=3.8
 pillow>=10
 pytest>=8
 reportlab>=4
+pypdf>=5

@@ -4,6 +4,7 @@ import {
   Diagnostics,
   InspectionData,
   inspectPoint,
+  getInitialConditionProvenance,
 } from '../core/tdgl';
 import {
   validateSimulationConfig,
@@ -100,6 +101,38 @@ export const SimulationLab: React.FC = () => {
       pairR0: draftPairR0,
     });
   }, [dimension, draftL, draftN, draftDt, draftDuration, draftSeed, draftNoiseAmplitude, draftPhi0, preset, draftPairR0]);
+
+  const provenance = useMemo(() => {
+    if (valResult.config) {
+      return getInitialConditionProvenance(valResult.config);
+    }
+    const L = Number(draftL) || 100;
+    const N = Number(draftN) || 1024;
+    return getInitialConditionProvenance({
+      dimension,
+      L,
+      N,
+      Nx: N,
+      Ny: dimension === 1 ? 1 : N,
+      dx: L / N,
+      dt: Number(draftDt) || 0.001,
+      duration: Number(draftDuration) || 40,
+      seed: Number(draftSeed) || 42,
+      noiseAmplitude: Number(draftNoiseAmplitude) || 0.05,
+      phi0: Number(draftPhi0) || 0.0,
+      preset:
+        preset === '1d_pair'
+          ? 'kink_pair'
+          : preset === 'uniform_plus1'
+          ? 'plus1'
+          : preset === 'uniform_minus1'
+          ? 'minus1'
+          : draftPhi0 !== '0.0' && draftPhi0 !== '0' && draftPhi0 !== ''
+          ? 'biased'
+          : 'random',
+      pairR0: Number(draftPairR0) || 7.0,
+    });
+  }, [valResult.config, dimension, draftL, draftN, draftDt, draftDuration, draftSeed, draftNoiseAmplitude, draftPhi0, preset, draftPairR0]);
 
   const valResultRef = useRef<ValidationResult>(valResult);
   valResultRef.current = valResult;
@@ -577,6 +610,34 @@ export const SimulationLab: React.FC = () => {
                   <option value="uniform_plus1">Uniform +1 Ground State</option>
                   <option value="uniform_minus1">Uniform -1 Ground State</option>
                 </select>
+
+                {/* Initial Condition Generator & Provenance Indicator */}
+                <div
+                  style={{
+                    marginTop: '0.45rem',
+                    padding: '0.45rem 0.6rem',
+                    borderRadius: 'var(--radius-xs)',
+                    background: provenance.isCanonicalReference ? 'rgba(46, 125, 50, 0.08)' : 'var(--bg-subtle)',
+                    border: `1px solid ${provenance.isCanonicalReference ? 'rgba(46, 125, 50, 0.3)' : 'var(--border-hairline)'}`,
+                    fontSize: '0.72rem',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                    <span style={{ fontWeight: 600, color: provenance.isCanonicalReference ? 'var(--forest)' : 'var(--ink-primary)' }}>
+                      {provenance.isCanonicalReference ? '✓ Canonical Reference IC' : provenance.label}
+                    </span>
+                    <span style={{ fontSize: '0.68rem', color: 'var(--ink-muted)' }}>
+                      {provenance.source === 'canonical_numpy_pcg64'
+                        ? 'NumPy PCG64'
+                        : provenance.source === 'mulberry32'
+                        ? 'Mulberry32'
+                        : 'Analytic'}
+                    </span>
+                  </div>
+                  <div style={{ color: 'var(--ink-secondary)', lineHeight: 1.35 }}>
+                    {provenance.description}
+                  </div>
+                </div>
               </div>
 
               {/* Spatial Dimension Toggle */}
@@ -756,9 +817,17 @@ export const SimulationLab: React.FC = () => {
                 <div className="notice-box notice-success">
                   <div style={{ fontWeight: 600 }}>
                     Monotonicity Bound: Δt<sub>max</sub> = {valResult.budget?.stabilityLimit.toFixed(6)}
+                    <span style={{ fontWeight: 400, fontSize: '0.72rem', color: 'var(--ink-secondary)', marginLeft: '4px' }}>
+                      (sufficient condition for |φ| ≤ M)
+                    </span>
                   </div>
-                  <div style={{ color: 'var(--ink-secondary)', marginTop: '2px' }}>
-                    Satisfied ({valResult.budget?.safetyRatio.toFixed(1)}% of bound). Budget:{' '}
+                  {valResult.budget?.linearStabilityLimit && (
+                    <div style={{ fontSize: '0.72rem', color: 'var(--ink-secondary)', marginTop: '2px' }}>
+                      Ordered-State Linear Stability: Δt<sub>lin</sub> = {valResult.budget.linearStabilityLimit.toFixed(6)} (Yadav et al. 2024 Eq. 35)
+                    </div>
+                  )}
+                  <div style={{ color: 'var(--ink-secondary)', marginTop: '3px' }}>
+                    Satisfied ({valResult.budget?.safetyRatio.toFixed(1)}% of monotonicity bound). Budget:{' '}
                     {valResult.budget?.cellSteps.toLocaleString()} cell-steps (≤ 50M cap).
                   </div>
                 </div>
