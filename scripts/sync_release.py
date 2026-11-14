@@ -17,9 +17,23 @@ def reference_results():
 
 def copies():
  report=P/'report/P20_Detailed_Report.pdf';md=P/'report/P20_Detailed_Report.md';ppt=R/'presentation/P20_Final.pptx';nb=R/'notebooks/P20_Simulations.ipynb'
- return [(report,R/'docs/P20_Technical_Report.pdf'),(md,R/'docs/P20_Technical_Report.md'),(ppt,R/'presentation/P20_Progress_Presentation.pptx'),(ppt,P/'ppt/P20_Final.pptx'),(report,W/'downloads/P20_Detailed_Report.pdf'),(report,W/'downloads/P20_Technical_Report.pdf'),(md,W/'downloads/P20_Detailed_Report.md'),(md,W/'downloads/P20_Technical_Report.md'),(ppt,W/'downloads/P20_Final.pptx'),(ppt,W/'downloads/P20_Progress_Presentation.pptx'),(nb,W/'downloads/P20_Simulations.ipynb'),(nb,P/'codes/P20_Simulations.ipynb')]
+ return [(R/'audit/notebook_execution.json',P/'codes/audit/notebook_execution.json'),(report,R/'docs/P20_Technical_Report.pdf'),(md,R/'docs/P20_Technical_Report.md'),(ppt,R/'presentation/P20_Progress_Presentation.pptx'),(ppt,P/'ppt/P20_Final.pptx'),(report,W/'downloads/P20_Detailed_Report.pdf'),(report,W/'downloads/P20_Technical_Report.pdf'),(md,W/'downloads/P20_Detailed_Report.md'),(md,W/'downloads/P20_Technical_Report.md'),(ppt,W/'downloads/P20_Final.pptx'),(ppt,W/'downloads/P20_Progress_Presentation.pptx'),(nb,W/'downloads/P20_Simulations.ipynb'),(nb,P/'codes/P20_Simulations.ipynb')]
 
 def sync():
+ # A fresh checkout can also assemble the scientific submission from canonical files.
+ for folder in ['src','experiments','tests','results']:
+  shutil.copytree(R/folder,P/'codes'/folder,dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__','.pytest_cache','.ipynb_checkpoints'))
+ for filename in ['requirements.txt','requirements-notebook.txt','pytest.ini']:
+  shutil.copy2(R/filename,P/'codes'/filename)
+ (P/'codes/docs').mkdir(parents=True,exist_ok=True)
+ shutil.copy2(R/'docs/source_notes.md',P/'codes/docs/source_notes.md')
+ (P/'codes/audit').mkdir(parents=True,exist_ok=True)
+ for name in ['check_implementation.py','replay_runs.py','temporal_convergence.py','save_spectra.py','independent_full_replay.json','independent_temporal_convergence.json','implementation_checks.json','observed_run_summary.json']:
+  shutil.copy2(R/'audit'/name,P/'codes/audit'/name)
+ if not (P/'README.md').exists():
+  (P/'README.md').write_text('# Project20: 1D and 2D Model-A TDGL\n\nChandranil Das (261340004), Devkinandan Sharma (261340005)\nKotak School of Sustainability, M.Tech in AI for Sustainability\n\nSee report/P20_Detailed_Report.pdf, ppt/P20_Final.pptx and codes/P20_Simulations.ipynb. Run scientific commands from codes/. The directory is intentionally unzipped.\n')
+ if not (P/'codes/README.md').exists():
+  (P/'codes/README.md').write_text('# Runnable TDGL code\n\nFrom this folder, install requirements-notebook.txt and open P20_Simulations.ipynb with Jupyter Lab. Run python -m pytest -q for tests and python experiments/run_all.py for full experiments. Full reruns overwrite generated results. See ../report/P20_Detailed_Report.pdf for equations and validation.\n')
  for src,dst in copies():
   dst.parent.mkdir(parents=True,exist_ok=True)
   if src!=dst:shutil.copy2(src,dst)

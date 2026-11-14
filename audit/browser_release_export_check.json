@@ -4,5 +4,11 @@
   "field_error_vs_python_archive": 9.43689570931383e-16,
   "browser_energy": -19.34405097134933,
   "initial_source": "canonical archive",
-  "passed": true
+  "passed": true,
+  "production_2d": {
+    "time": 25,
+    "field_error_vs_python_archive": 2.248201624865942e-15,
+    "browser_energy": -3156.4168960421275,
+    "passed": true
+  }
 }
