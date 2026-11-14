@@ -119,9 +119,9 @@ export const AboutView: React.FC = () => {
 
       {/* 4. Research Deliverables */}
       <section className="notebook-panel">
-        <h2 style={{ fontSize: '1.1rem', marginBottom: '0.65rem' }}>4. Audited Deliverable Downloads</h2>
+        <h2 style={{ fontSize: '1.1rem', marginBottom: '0.65rem' }}>4. Project Documentation & Deliverables</h2>
         <p style={{ fontSize: '0.85rem', color: 'var(--ink-secondary)', marginBottom: '0.75rem' }}>
-          Current synchronized reports, presentation, and executable simulation notebook produced during Project P20:
+          Comprehensive technical report, presentation deck, and executable simulation notebook for Project P20:
         </p>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <a
@@ -161,10 +161,7 @@ export const AboutView: React.FC = () => {
             <span>Simulation Notebook (.ipynb)</span>
           </a>
         </div>
-        <p style={{ fontSize: '0.72rem', color: 'var(--ink-muted)', marginTop: '0.65rem', fontStyle: 'italic' }}>
-          Notice: Download files provide our current synchronized project artifacts (verifiable via <code>/generated/release_manifest.json</code>).
-          In accordance with academic licensing, the journal source articles (Verma et al. 2023, Yadav et al. 2024) are linked directly via their APS DOIs above.
-        </p>
+
       </section>
 
       {/* 5. Physical & Numerical Limitations */}
@@ -177,23 +174,22 @@ export const AboutView: React.FC = () => {
             strictly on the interior sub-domain <code>[0.2L, 0.8L]</code>, while periodic defect annihilation is studied via kink–antikink pairs.
           </li>
           <li>
-            <strong>Initial Condition Provenance & PRNG Behavior:</strong> The default 1D (<code>L=100, N=1024</code>) and 2D (<code>L=128, 128×128</code>)
-            random quench presets are initialized from the exact bitwise canonical snapshots (<code>t=0</code>) of our audited Python research archives,
-            generated via NumPy's <code>default_rng(42)</code> (PCG64). Other configs and custom seeds utilize a deterministic 32-bit Mulberry32 PRNG
-            for responsive cross-browser exploration. Specifying seed 42 alone does <em>not</em> define the same initial field when other
-            configurations, grid dimensions, or generators are used.
+            <strong>Initial Perturbations & Random Seeds:</strong> Random quench simulations initiate from small random perturbations with zero expectation
+            (<code>|δφ| ≤ 0.05</code>) about the disordered state; individual finite samples need not have exactly zero mean.
+            Custom seeds generate independent pseudorandom initial configurations across different grid sizes and dimensions.
           </li>
           <li>
-            <strong>Observation Window vs. Full Research Trajectories:</strong> In the live interactive Simulation Lab, default observation
-            endpoints are set to <code>t = 40</code> (1D) and <code>t = 25</code> (2D) to strictly observe the 50,000,000 cell-step browser compute budget
-            and limit total computation. The full project runs in Saved Results extend to <code>t = 1000</code> (1D)
-            and <code>t = 100</code> (2D) to inspect later morphologies and optional spectral diagnostics.
+            <strong>Observation Windows & Extended Trajectories:</strong> In the interactive Simulation Lab, observation durations
+            (<code>t = 40</code> in 1D, <code>t = 25</code> in 2D) are bounded to maintain responsive client-side performance under the
+            50,000,000 cell-step work budget. Extended trajectories (<code>t = 1000</code> in 1D, <code>t = 100</code> in 2D) are provided
+            in Saved Results to examine late-stage domain coarsening and optional spectral diagnostics.
           </li>
           <li>
             <strong>Explicit Timestep & Monotonicity Constraints:</strong> Explicit Forward Euler does not provide an unconditional nonlinear
             energy dissipation guarantee. While the continuous Model-A equation satisfies <code>dF/dt ≤ 0</code> everywhere, discrete Euler
-            the app enforces <code>Δt ≤ 1 / [ (3M² - 1) + 2D/(Δx)² ]</code>, a conservative sufficient condition assuming the field remains within <code>|φ| ≤ M</code>, with <code>M ≥ 1</code> chosen from the initial amplitude. This differs from
-            the ordered-state linear stability bound <code>Δt &lt; (Δx)² / [ (Δx)² + 2D ]</code> (Yadav et al. 2024 Eq. 35).
+            integration satisfies monotonic energy dissipation under the conservative sufficient condition <code>Δt ≤ 1 / [ (3M² - 1) + 2D/(Δx)² ]</code>,
+            assuming <code>M ≥ 1</code> and the field remains bounded by <code>|φ| ≤ M</code>. This condition is more stringent than the ordered-state
+            linear stability bound <code>Δt &lt; (Δx)² / [ (Δx)² + 2D ]</code> (Yadav et al. 2024 Eq. 35) around <code>φ = ±1</code>.
           </li>
         </ul>
       </section>

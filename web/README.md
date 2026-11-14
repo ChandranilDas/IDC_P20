@@ -20,12 +20,12 @@ The application provides four dedicated views:
   - *Note on Presets*: Browser live simulation presets are calibrated as short interactive demonstrations (1D random quench $t=40$, 2D domain coarsening $t=25$, 1D kink pair $t=40$) to stay safely within browser execution and memory budgets. Full long-duration simulations are provided in the Saved Results view.
 
 - **Saved Results**:
-  - Full-resolution Float64 binary datasets (`.bin`) exported directly from audited Python simulations, preserving complete spatial grids ($1024$ in 1D, $128 \times 128$ in 2D), non-uniform snapshot times, and SHA-256 cryptographic provenance.
+  - Full-resolution Float64 binary datasets (`.bin`) exported directly from Python simulations, preserving complete spatial grids ($1024$ in 1D, $128 \times 128$ in 2D), non-uniform snapshot times,.
   - Contains authoritative reference trajectories: 1D random quench ($t=0 \to 1000$), 2D domain coarsening ($t=0 \to 100$), and 1D kink-antikink annihilation ($t=0 \to 800$, $R_0=7.0$).
   - Full inspection and diagnostic playback work directly on saved reference runs without re-running simulations.
 
 - **Validation**:
-  - Authoritative presentation of the 6 core numerical and physical validation pillars derived from audited Python runs:
+  - Authoritative presentation of the 6 core numerical and physical validation pillars derived from Python runs:
     1. Energy monotonicity across 1.81 million replayed integration steps ($0$ violations $> 10^{-9}$).
     2. Discrete gradient-flow consistency ($|\langle \delta F/\delta\phi, v \rangle - dF/d\epsilon| \le 1.1 \times 10^{-8}$).
     3. Analytical kink spatial truncation convergence ($p = 1.99$).
@@ -63,7 +63,7 @@ Fourteen independent acceptance tests (7 mounted UI interaction tests and 7 scie
 cd web
 npm test
 ```
-- **Stencils & Numerical Parity**: Exact agreement within $10^{-12}$ against audited Python fixtures for 1D and 2D Forward Euler steps, discrete Laplacians, and rectangular unequal-spacing grids ($N_x \ne N_y$, $\Delta x \ne \Delta y$).
+- **Stencils & Numerical Parity**: Exact agreement within $10^{-12}$ against Python fixtures for 1D and 2D Forward Euler steps, discrete Laplacians, and rectangular unequal-spacing grids ($N_x \ne N_y$, $\Delta x \ne \Delta y$).
 - **Analytical Fixed Points & Periodic Wrap**: Invariance of $\phi = \pm 1$ and boundary wrapping.
 - **Energy Monotonicity**: Verifies step-by-step free energy decay on multi-step trajectories.
 - **Input Validation**: Rejection of decimals in integers, empty inputs, negative values, and budget exceedances without silent fallback.
@@ -124,7 +124,7 @@ Project P20: 1D & 2D Time-Dependent Ginzburg–Landau (TDGL) Numerical Simulatio
 • Implemented and verified the real scalar nonconserved Model-A TDGL equation in 1D and 2D using explicit Forward Euler and central finite-difference stencils under periodic boundary conditions.
 • Formulated an exact forward-edge discrete Ginzburg–Landau free energy functional guaranteed to match the discrete Laplacian under functional differentiation (directional derivative mismatch ≤ 1.1 × 10⁻⁸).
 • Validated numerical accuracy across 1.81 million replayed integration steps (0 free energy violations above 10⁻⁹), confirming quadratic spatial convergence (p = 1.99), first-order temporal convergence (p = 0.9986), and descriptive finite-window spectral scaling fits (k⁻²·⁰⁶ in 1D, k⁻³·⁰² in 2D matching Porod tails).
-• Engineered an interactive static web application (React, TypeScript, Vite) featuring non-blocking Web Worker integration (Float64Array), live physical diagnostics, an interactive finite-difference inspector, and lazy-loaded Float64 binary datasets exported from audited Python simulations.
+• Engineered an interactive static web application (React, TypeScript, Vite) featuring non-blocking Web Worker integration (Float64Array), live physical diagnostics, an interactive finite-difference inspector, and lazy-loaded Float64 binary datasets exported from Python simulations.
 ```
 
 ## Published links

@@ -23,6 +23,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from src.plot_style import FIELD, FIELD_CMAP, RMS, REFERENCE
 from src.tdgl_core import TDGL2DConfig
 from src.initial_conditions import make_random_ic_2d
 from src.tdgl_2d import simulate_2d
@@ -136,7 +137,7 @@ def run():
             snaps[i].T,
             origin="lower",
             extent=[0, cfg.L, 0, cfg.L],
-            cmap="coolwarm",
+            cmap=FIELD_CMAP,
             vmin=-1.0,
             vmax=1.0
         )

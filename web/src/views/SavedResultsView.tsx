@@ -196,10 +196,10 @@ export const SavedResultsView: React.FC = () => {
       <div className="card" style={{ padding: '2.5rem', textAlign: 'center' }}>
         <Database size={32} color="#147d92" style={{ margin: '0 auto' }} />
         <div style={{ marginTop: '0.75rem', fontWeight: 600, color: '#102c57' }}>
-          Loading Authoritative Saved Run: {manifest?.runs[selectedRunId]?.name || selectedRunId}...
+          Loading Simulation Run: {manifest?.runs[selectedRunId]?.name || selectedRunId}...
         </div>
         <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
-          Downloading Float64 binary field cube and verifying SHA-256 provenance
+          Loading full-precision trajectory data...
         </div>
       </div>
     );
@@ -299,10 +299,10 @@ export const SavedResultsView: React.FC = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.75rem' }}>
           <div>
             <h1 style={{ fontSize: '1.35rem', fontWeight: 600, color: 'var(--ink-primary)', marginBottom: '0.2rem' }}>
-              Saved Reference Simulations
+              Extended Simulation Trajectories
             </h1>
             <p style={{ fontSize: '0.825rem', color: 'var(--ink-secondary)' }}>
-              Byte-level playback of audited Float64 binary archives exported directly from verified Python reference runs.
+              Interactive inspection of full-duration phase ordering trajectories, domain growth morphologies, and physical diagnostics.
             </p>
           </div>
 
@@ -342,10 +342,10 @@ export const SavedResultsView: React.FC = () => {
           <span>Δx = <strong style={{ color: 'var(--ink-primary)' }}>{run.dx.toFixed(4)}</strong></span>
           <span>Δt = <strong style={{ color: 'var(--ink-primary)' }}>{run.dt}</strong></span>
           <span>Snapshots: <strong style={{ color: 'var(--ink-primary)' }}>{run.num_snapshots} frames</strong></span>
-          <span style={{ marginLeft: 'auto', color: 'var(--forest)', fontWeight: 500 }}>✓ SHA-256 Verified</span>
+          <span style={{ marginLeft: 'auto', color: 'var(--forest)', fontWeight: 500 }}>Extended Trajectory</span>
         </div>
 
-        {/* Full Archive Duration & Generator Provenance Strip */}
+        {/* Evolution Window Strip */}
         <div
           style={{
             marginTop: '0.5rem',
@@ -363,18 +363,18 @@ export const SavedResultsView: React.FC = () => {
         >
           <div>
             <span style={{ fontWeight: 600, color: 'var(--ink-primary)' }}>
-              Full Research Trajectory (t = 0 → {run.t_snapshots[run.t_snapshots.length - 1]}):
+              Evolution Window (t = 0 → {run.t_snapshots[run.t_snapshots.length - 1]}):
             </span>{' '}
             <span style={{ color: 'var(--ink-secondary)' }}>
               {run.id === 'tdgl_1d_random'
-                ? 'Full multi-decade coarsening across 1,000,000 steps (504 snapshots). Contrast with live interactive laboratory endpoint t = 40 (capped by 50M cell-steps budget).'
+                ? '1D ordering over 1,000,000 steps. Six domain walls remain at t = 1000.'
                 : run.id === 'tdgl_2d_random'
-                ? 'Full 2D domain growth across 10,000 steps (101 snapshots). Contrast with live interactive laboratory endpoint t = 25 (capped by 50M cell-steps budget).'
-                : 'Full defect annihilation trajectory resolving topological kink-antikink collapse.'}
+                ? '2D ordering over 10,000 steps. Domains grow and interfaces smooth; the final field remains nonuniform.'
+                : 'A paired domain contracts and disappears, leaving a uniform negative phase.'}
             </span>
           </div>
-          <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--forest)', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
-            {run.seed !== undefined ? `NumPy default_rng(${run.seed}) [PCG64]` : 'Analytic IC'}
+          <div style={{ color: 'var(--ink-secondary)', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
+            {run.seed !== undefined ? `Random Quench (seed ${run.seed})` : 'Analytic Profile'}
           </div>
         </div>
       </div>
@@ -503,26 +503,21 @@ export const SavedResultsView: React.FC = () => {
         />
       </div>
 
-      {/* Accessible Dataset Provenance & SHA-256 Disclosure Section */}
+      {/* Simulation Specifications & Dataset Summary */}
       <details className="provenance-disclosure">
-        <summary>Archive Provenance & Cryptographic Checksums (SHA-256)</summary>
+        <summary>Simulation parameters</summary>
         <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.775rem' }}>
-          <div>
-            <span style={{ color: 'var(--ink-muted)' }}>Source NumPy Archive: </span>
-            <code style={{ fontFamily: 'var(--font-mono)', color: 'var(--ink-primary)' }}>{run.source_npz}</code>
+          <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', color: 'var(--ink-secondary)' }}>
+            <span>Domain: <strong>L = {run.L.toFixed(1)}</strong></span>
+            <span>Grid: <strong>{run.dimension === 1 ? `N = ${Nx}` : `${Nx} × ${Ny}`}</strong></span>
+            <span>Mesh Spacing: <strong>Δx = {run.dx.toFixed(4)}</strong></span>
+            <span>Time Step: <strong>Δt = {run.dt}</strong></span>
           </div>
-          <div>
-            <span style={{ color: 'var(--ink-muted)' }}>Binary Cube Asset: </span>
-            <code style={{ fontFamily: 'var(--font-mono)', color: 'var(--ink-primary)' }}>public/{run.binary_file}</code>
-          </div>
-          <div>
-            <span style={{ color: 'var(--ink-muted)' }}>NPZ SHA-256 Checksum: </span>
-            <code style={{ fontFamily: 'var(--font-mono)', color: 'var(--forest)', wordBreak: 'break-all' }}>{run.source_sha256}</code>
-          </div>
-          <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.25rem', color: 'var(--ink-secondary)' }}>
-            <span>Data Format: Float64 Little-Endian</span>
-            <span>Total Shape: [{run.shape.join(', ')}]</span>
-            <span>Diagnostics: {run.num_diagnostic_points} points</span>
+          <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', color: 'var(--ink-secondary)' }}>
+            <span>Field Array Shape: <strong>[{run.shape.join(', ')}]</strong></span>
+            <span>Temporal Snapshots: <strong>{run.num_snapshots} frames</strong></span>
+            <span>Diagnostic Samples: <strong>{run.num_diagnostic_points} points</strong></span>
+            <span>Data Precision: <strong>Float64 (double precision)</strong></span>
           </div>
         </div>
       </details>

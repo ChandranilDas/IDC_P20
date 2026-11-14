@@ -127,8 +127,8 @@ export function getInitialConditionProvenance(cfg: SimulationConfig): InitialCon
     return {
       source: 'canonical_numpy_pcg64',
       generator: meta.generator,
-      label: `Canonical Reference Snapshot [${dimLabel}]`,
-      description: `Exact bitwise initial field from audited Python research archive (${meta.sourceArchive}). Generated via NumPy default_rng(seed=42) [PCG64]. Matches Python reference run at t=0.`,
+      label: `Random Disordered State [${dimLabel}]`,
+      description: `Uniform random perturbations (|δφ| ≤ ${cfg.noiseAmplitude}) on homogeneous disordered background φ₀ = 0.0.`,
       isCanonicalReference: true,
       referenceFile: meta.sourceArchive,
       archiveSha256: meta.sourceSha256,
@@ -140,7 +140,7 @@ export function getInitialConditionProvenance(cfg: SimulationConfig): InitialCon
       source: 'analytic_uniform',
       generator: 'Analytic Uniform Ground State (φ = +1.0)',
       label: 'Analytic Uniform (+1.0)',
-      description: 'Exact homogeneous broken-symmetry ground state φ(r) = +1.0 everywhere. Deterministic fixed point of the Model-A equation (∂φ/∂t = 0).',
+      description: 'Exact homogeneous broken-symmetry ground state φ(r) = +1.0 everywhere. Stationary state of the Model-A equation (∂φ/∂t = 0).',
       isCanonicalReference: false,
     };
   }
@@ -150,7 +150,7 @@ export function getInitialConditionProvenance(cfg: SimulationConfig): InitialCon
       source: 'analytic_uniform',
       generator: 'Analytic Uniform Ground State (φ = -1.0)',
       label: 'Analytic Uniform (-1.0)',
-      description: 'Exact homogeneous broken-symmetry ground state φ(r) = -1.0 everywhere. Deterministic fixed point of the Model-A equation (∂φ/∂t = 0).',
+      description: 'Exact homogeneous broken-symmetry ground state φ(r) = -1.0 everywhere. Stationary state of the Model-A equation (∂φ/∂t = 0).',
       isCanonicalReference: false,
     };
   }
@@ -161,7 +161,7 @@ export function getInitialConditionProvenance(cfg: SimulationConfig): InitialCon
       source: 'analytic_kink_pair',
       generator: `Analytic Kink–Antikink Pair Profile (R₀=${R0})`,
       label: `Analytic Kink–Antikink Pair (R₀=${R0})`,
-      description: `Deterministic double-tanh profile: φ(x) = tanh((x - x₁)/√2) - tanh((x - x₂)/√2) - 1 with separation R₀ = ${R0}. Sampled paired-wall profile evolved with periodic indexing.`,
+      description: `Deterministic double-tanh profile: φ(x) = tanh((x - x₁)/√2) - tanh((x - x₂)/√2) - 1 with separation R₀ = ${R0}. Paired-wall initial condition on a periodic domain.`,
       isCanonicalReference: false,
     };
   }
@@ -169,18 +169,18 @@ export function getInitialConditionProvenance(cfg: SimulationConfig): InitialCon
   if (cfg.preset === 'biased') {
     return {
       source: 'mulberry32',
-      generator: `Mulberry32 PRNG (seed=${cfg.seed})`,
-      label: `Biased Mixture (Mulberry32, seed ${cfg.seed})`,
-      description: `Biased disordered quench with background φ₀ = ${cfg.phi0 || 0.2} and noise |δφ| ≤ ${cfg.noiseAmplitude} using deterministic Mulberry32 PRNG.`,
+      generator: `Biased Field (seed ${cfg.seed})`,
+      label: `Biased Mixture (seed ${cfg.seed})`,
+      description: `Uniform random perturbations (|δφ| ≤ ${cfg.noiseAmplitude}) on non-zero background magnetization φ₀ = ${cfg.phi0 || 0.2}.`,
       isCanonicalReference: false,
     };
   }
 
   return {
     source: 'mulberry32',
-    generator: `Mulberry32 PRNG (seed=${cfg.seed})`,
-    label: `Browser Mulberry32 PRNG (seed ${cfg.seed})`,
-    description: `Deterministic 32-bit PRNG for responsive cross-browser exploration. Note: seed ${cfg.seed} alone does NOT produce the canonical reference initial field when parameters, grid, or generators differ.`,
+    generator: `Pseudorandom Field (seed ${cfg.seed})`,
+    label: `Random Disordered State (seed ${cfg.seed})`,
+    description: `Uniform random perturbations (|δφ| ≤ ${cfg.noiseAmplitude}) on background φ₀ = ${cfg.phi0}.`,
     isCanonicalReference: false,
   };
 }

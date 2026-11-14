@@ -443,7 +443,6 @@ export const SimulationLab: React.FC = () => {
 
   const displayField = displayBundle ? displayBundle.field : null;
   const displayDiag = displayBundle ? displayBundle.diagnostics : null;
-  const activeRunId = displayBundle ? displayBundle.runId : '';
 
   // Export handlers
   const exportJSON = () => {
@@ -594,7 +593,6 @@ export const SimulationLab: React.FC = () => {
                   <label htmlFor="sim-preset-select" className="param-label">
                     Preset:
                   </label>
-                  <span className="param-hint">Demo calibration</span>
                 </div>
                 <select
                   id="sim-preset-select"
@@ -611,27 +609,23 @@ export const SimulationLab: React.FC = () => {
                   <option value="uniform_minus1">Uniform -1 Ground State</option>
                 </select>
 
-                {/* Initial Condition Generator & Provenance Indicator */}
+                {/* Initial State Configuration */}
                 <div
                   style={{
                     marginTop: '0.45rem',
                     padding: '0.45rem 0.6rem',
                     borderRadius: 'var(--radius-xs)',
-                    background: provenance.isCanonicalReference ? 'rgba(46, 125, 50, 0.08)' : 'var(--bg-subtle)',
-                    border: `1px solid ${provenance.isCanonicalReference ? 'rgba(46, 125, 50, 0.3)' : 'var(--border-hairline)'}`,
+                    background: 'var(--bg-subtle)',
+                    border: '1px solid var(--border-hairline)',
                     fontSize: '0.72rem',
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-                    <span style={{ fontWeight: 600, color: provenance.isCanonicalReference ? 'var(--forest)' : 'var(--ink-primary)' }}>
-                      {provenance.isCanonicalReference ? '✓ Canonical Reference IC' : provenance.label}
+                    <span style={{ fontWeight: 600, color: 'var(--ink-primary)' }}>
+                      {provenance.label}
                     </span>
                     <span style={{ fontSize: '0.68rem', color: 'var(--ink-muted)' }}>
-                      {provenance.source === 'canonical_numpy_pcg64'
-                        ? 'NumPy PCG64'
-                        : provenance.source === 'mulberry32'
-                        ? 'Mulberry32'
-                        : 'Analytic'}
+                      {provenance.source === 'analytic_uniform' || provenance.source === 'analytic_kink_pair' ? 'Analytic' : 'Random initial field'}
                     </span>
                   </div>
                   <div style={{ color: 'var(--ink-secondary)', lineHeight: 1.35 }}>
@@ -941,7 +935,6 @@ export const SimulationLab: React.FC = () => {
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--ink-secondary)', fontFamily: 'var(--font-mono)' }}>
                 t = {displayDiag ? displayDiag.time.toFixed(3) : '0.000'} · Frame {snapshots.length > 0 ? activeSnapshotIdx + 1 : 1} of {snapshots.length || 1}
-                {activeRunId && <span style={{ marginLeft: '0.4rem', color: 'var(--ink-muted)' }}>[{activeRunId}]</span>}
               </div>
             </div>
 

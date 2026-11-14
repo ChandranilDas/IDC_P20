@@ -472,10 +472,10 @@ export const ValidationView: React.FC = () => {
         {/* Replay Details Panel */}
         <div className="notebook-panel">
           <div className="notebook-panel-header">
-            <div className="notebook-panel-title">1. Independent Replay Step Breakdown</div>
+            <div className="notebook-panel-title">1. Stepwise Trajectory Dissipation Breakdown</div>
           </div>
           <p style={{ fontSize: '0.8rem', color: 'var(--ink-secondary)', marginBottom: '0.65rem' }}>
-            Numerical replay of every Forward Euler step against archived Python reference trajectories within floating-point tolerance (acceptance threshold <code>≤ 10⁻⁹</code>).
+            Numerical verification of every Forward Euler step across extended reference trajectories within floating-point tolerance (acceptance threshold <code>≤ 10⁻⁹</code>).
             Energy increases above <code>10⁻⁹</code> are treated as numerical descent violations.
           </p>
 
@@ -484,7 +484,7 @@ export const ValidationView: React.FC = () => {
               <thead>
                 <tr>
                   <th>Trajectory</th>
-                  <th>Audited Steps</th>
+                  <th>Integration Steps</th>
                   <th>Final F</th>
                   <th style={{ textAlign: 'right' }}>Violations</th>
                 </tr>

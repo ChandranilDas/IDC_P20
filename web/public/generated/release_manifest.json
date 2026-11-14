@@ -3,20 +3,20 @@
   "reference_results": "/generated/reference_results.json",
   "files": {
     "/downloads/P20_Detailed_Report.pdf": {
-      "sha256": "8a4cda7e42b98f48411bd29cc2b9501283ac9a7d06ed41b0ef09b9f6763bf44b",
-      "bytes": 2582234
+      "sha256": "c79259c3c1519eb59bd65f368adb79ca85fb99ccb8b95fd6505531ef00d7cab7",
+      "bytes": 2545954
     },
     "/downloads/P20_Final.pptx": {
-      "sha256": "e36a72718b20d9fad2c1a596288cf95d6b83866e0e555c6bab2571cdfca91404",
-      "bytes": 489687
+      "sha256": "91f515b120f5ec633f50aba326880cd21019900588e987fae2c08b2383d6b36a",
+      "bytes": 498273
     },
     "/downloads/P20_Simulations.ipynb": {
-      "sha256": "25e2c1d0e02b3188b2ae77ac7907c7637aa87f23721bb2398ff86e34464a139f",
-      "bytes": 790252
+      "sha256": "503ea3f2763dc5263100c79165c907171124d6c4326c3ca37776b93e07925af9",
+      "bytes": 805645
     },
     "/downloads/P20_Detailed_Report.md": {
-      "sha256": "5ec2a54d774b0b017502cd29cb9c16ab09235c7a1f2c7c617799b4e2a5e025b9",
-      "bytes": 32426
+      "sha256": "dfa55d0c9181d9e44c39bcec50c116431b8dfdf4ff439c2542f290e7226632a6",
+      "bytes": 32156
     }
   }
 }

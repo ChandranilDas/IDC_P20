@@ -32,7 +32,7 @@ The core deliverable is runnable scientific code: real scalar fields, periodic n
 
 This is a source-guided implementation and verification study. It does not claim bitwise reproduction of the papers, which use different random realizations and observation schedules. The pair separation is deliberately changed to permit annihilation over a practical simulation time.
 
-The report follows the supplied papers' scientific organization: formulation, numerical method, simulation details, results, validation and discussion. Figures are generated from this project's arrays; they are not copied from the reference papers.
+We examine ordering morphology, interfacial motion and the evolution of free energy. Analytical solutions and grid-refinement studies connect the observed dynamics to the governing equation.
 
 C. Reading the evidence
 
@@ -208,7 +208,7 @@ D. Execution and data retention
 
 At each step the solver computes the periodic Laplacian, adds the local reaction, and advances the field. Diagnostics and selected snapshots are saved separately. The raw archives contain 504 snapshots for random 1D, 101 for 2D, and nine for the pair experiment.
 
-The standalone experiment drivers execute the full runs. A separate independent replay advances the stored initial fields without importing the project solvers; it checks every time-step energy and compares all saved snapshots. The professor-facing notebook adds shorter, executed demonstrations.
+The standalone experiment drivers execute the full runs. A separate independent replay advances the stored initial fields without importing the project solvers; it checks every time-step energy and compares all saved snapshots. The notebook includes shorter demonstrations for interactive exploration.
 
 
 ## VI. ONE-DIMENSIONAL RANDOM ORDERING
@@ -345,7 +345,7 @@ The final squared moments are 0.830338707 in 1D and 0.906062496 in 2D. These val
 
 D. Reproducibility of statistics
 
-Each diagnostic is recomputable from the stored snapshots at common times. Raw archives retain fields rather than only figures, so wall counts, energy conventions and means can be independently examined. The notebook shows how to load these arrays and redraw the final fields. In the app, the standard seed-42 reference geometries start from these same archived initial fields. Other configurations use a labelled browser generator. Live runs have shorter observation windows than the full archives.
+Each diagnostic is recomputable from the stored snapshots at common times. Raw archives retain fields rather than only figures, so wall counts, energy conventions and means can be independently examined. The notebook presents full simulation fields and shorter demonstrations. Interactive runs allow exploration of initial conditions and numerical parameters; the grid, time step and observation window are specified for each configuration.
 
 All numerical conclusions in this report refer to the single seed and configurations in Sec. V. Differences across random realizations are not quantified. No confidence interval is attached to a single trajectory mean.
 
@@ -384,7 +384,7 @@ The continuum/discrete difference is expected truncation error; comparing the co
 ![FIG. 7. Actual residual and exact-solution temporal errors. Both uniform-field time tests coincide. The residual fit uses five spatial grids.](figures/07_convergence.png)
 
 
-## XII. ENERGY-GRADIENT, FIXED-POINT AND REPLAY AUDITS
+## XII. ENERGY-GRADIENT AND FIXED-POINT VALIDATION
 
 A. Fixed points and perturbations
 
@@ -400,7 +400,7 @@ The independent implementation checker uses separate cases and tolerances; its n
 
 C. Unit tests
 
-The professor-facing code copy passes all 13 Python tests. These tests cover the periodic stencil, equilibria, energy behavior and related implementation contracts. They complement, rather than replace, the longer physical trajectories and analytical checks.
+The scientific implementation passes all 13 Python tests. These tests cover the periodic stencil, equilibria, energy behavior and related implementation contracts. They complement, rather than replace, the longer physical trajectories and analytical checks.
 
 D. Independent full replay
 
@@ -417,9 +417,9 @@ Across 1,810,000 steps, there are zero energy increases above 10⁻⁹. The maxi
 
 Replaying the same discrete equations verifies implementation and saved-data consistency. It does not prove continuum accuracy or independence from mesh and initial seed.
 
-E. Audit files
+E. Numerical records
 
-The submission retains machine-readable validation JSON, convergence CSV, independent replay summaries and energy traces. Each figure in this report is generated from the retained archives or those validation values. No observed result is inferred solely from a visually plausible image.
+The submission retains machine-readable validation JSON, convergence CSV, independent replay summaries and energy traces. Each figure in this report is generated from the retained archives or those validation values.
 
 
 ## XIII. OPTIONAL FOURIER DIAGNOSTICS
@@ -467,9 +467,9 @@ The random runs do not reach uniform final states within the chosen time windows
 
 The paired-wall example changes the initial separation to shorten the observed process. Its nine snapshots do not determine an accurate annihilation time or interaction law. Optional spectral regressions carry only regression uncertainty and should not be presented as universal scaling verification.
 
-C. Reproducibility checklist
+C. Reproducing the simulations
 
-The unzipped Project20 folder contains this report, the corrected five-slide final deck and the scientific code. The notebook executes short demonstrations and displays full archived results. The standalone drivers reproduce the long runs; no web service or external dataset is needed.
+The project includes the report, five-slide presentation and scientific code. The notebook executes short demonstrations and displays full archived results. The standalone drivers reproduce the long runs; no web service or external dataset is needed.
 
 D. Code map and execution
 
@@ -486,7 +486,7 @@ D. Code map and execution
 
 Run from codes/: create a Python environment, install requirements.txt, then run python -m pytest -q. For notebook use install requirements-notebook.txt and open P20_Simulations.ipynb. Run python -m experiments.run_all for the full pipeline. Full reruns overwrite generated results; copy the submission first if retaining the supplied outputs is desired.
 
-The archived arrays and validation files are the numerical record for this report. CHECKSUMS.sha256 records the final delivered files. The final presentation uses these same archived fields and corrected summaries. The app downloads contain this report and that presentation.
+Saved fields, diagnostic series and convergence measurements accompany the code. The interactive application allows exploration of initial conditions and numerical parameters; observation windows are stated for each run.
 
 REFERENCES
 

@@ -8,6 +8,7 @@ from typing import List, Optional, Tuple, Dict
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+from .plot_style import *
 
 # Ensure matplotlib uses a non-interactive backend for headless execution
 matplotlib.use("Agg")
@@ -40,7 +41,7 @@ def plot_1d_initial_field(
 ) -> None:
     """Figure 1: Initial random fluctuation field."""
     fig, ax = plt.subplots(figsize=(7, 3.5))
-    ax.plot(x, phi_0, color="#1f77b4", lw=1.2, label=r"$\phi(x, 0) = \phi_0 + \delta\phi$ ($\phi_0=0$)")
+    ax.plot(x, phi_0, color=FIELD, lw=1.2, label=r"$\phi(x, 0) = \phi_0 + \delta\phi$ ($\phi_0=0$)")
     ax.axhline(0, color="k", ls=":", alpha=0.6)
     ax.set_xlim(x[0], x[-1])
     ax.set_ylim(-0.15, 0.15)
@@ -66,13 +67,13 @@ def plot_1d_multi_curves(
     fig, ax = plt.subplots(figsize=(8, 4.5))
     
     # Palette across times
-    colors = plt.cm.viridis(np.linspace(0.1, 0.9, len(selected_times)))
+    colors = [time_color(t) for t in selected_times]
     
     for idx_target, t_target in enumerate(selected_times):
         # find closest snapshot
         t_idx = int(np.argmin(np.abs(times - t_target)))
         actual_t = times[t_idx]
-        ax.plot(x, snapshots[t_idx], color=colors[idx_target], label=f"$t = {actual_t:.1f}$")
+        ax.plot(x, snapshots[t_idx], color=time_color(actual_t), label=f"$t = {actual_t:.1f}$")
         
     ax.axhline(+1.0, color="gray", ls="--", alpha=0.7, label=r"Equilibrium $\phi = \pm 1$")
     ax.axhline(-1.0, color="gray", ls="--", alpha=0.7)
@@ -103,7 +104,7 @@ def plot_1d_spacetime_heatmap(
     im = ax.pcolormesh(
         X, T, field_history,
         shading="auto",
-        cmap="coolwarm",
+        cmap=FIELD_CMAP,
         vmin=-1.0,
         vmax=1.0
     )
@@ -130,7 +131,7 @@ def plot_1d_kink_antikink_evolution(
 ) -> None:
     """Figure 4: Kink-antikink mutual attraction and merger."""
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    colors = plt.cm.plasma(np.linspace(0.1, 0.9, len(selected_indices)))
+    colors = [time_color(times[i]) for i in selected_indices]
     
     for idx, s_idx in enumerate(selected_indices):
         t_val = times[s_idx]
@@ -159,7 +160,7 @@ def plot_1d_final_profile(
 ) -> None:
     """Figure 5: Final ordered state showing plateau at phi ~ +/-1."""
     fig, ax = plt.subplots(figsize=(7, 3.5))
-    ax.plot(x, phi_final, color="#2ca02c", lw=2.0, label=f"Final state ($t = {t_final:.1f}$)")
+    ax.plot(x, phi_final, color=FIELD, lw=2.0, label=f"Final state ($t = {t_final:.1f}$)")
     ax.axhline(+1.0, color="gray", ls="--", alpha=0.7, label=r"Equilibrium $\phi = \pm 1$")
     ax.axhline(-1.0, color="gray", ls="--", alpha=0.7)
     ax.set_xlim(x[0], x[-1])
@@ -195,7 +196,7 @@ def plot_2d_coarsening_panels(
             snap.T,
             origin="lower",
             extent=[0, L, 0, L],
-            cmap="coolwarm",
+            cmap=FIELD_CMAP,
             vmin=-1.0,
             vmax=1.0
         )
@@ -226,7 +227,7 @@ def plot_free_energy_curves(
     """Figure 7: Free energy F(t) vs time for 1D and 2D verifying monotonic decrease."""
     # 1D plot
     fig1, ax1 = plt.subplots(figsize=(6.5, 4.0))
-    ax1.plot(diag_1d["diag_times"], diag_1d["free_energy"], color="#d62728", lw=2.0, label="1D TDGL $F(t)$")
+    ax1.plot(diag_1d["diag_times"], diag_1d["free_energy"], color=ENERGY, lw=2.0, label="1D TDGL $F(t)$")
     ax1.set_xlabel("Time $t$")
     ax1.set_ylabel("Total Free Energy $F(t)$")
     ax1.set_title("1D TDGL: Monotonic Free Energy Dissipation")
@@ -238,7 +239,7 @@ def plot_free_energy_curves(
 
     # 2D plot
     fig2, ax2 = plt.subplots(figsize=(6.5, 4.0))
-    ax2.plot(diag_2d["diag_times"], diag_2d["free_energy"], color="#9467bd", lw=2.0, label="2D TDGL $F(t)$")
+    ax2.plot(diag_2d["diag_times"], diag_2d["free_energy"], color=ENERGY, lw=2.0, label="2D TDGL $F(t)$")
     ax2.set_xlabel("Time $t$")
     ax2.set_ylabel("Total Free Energy $F(t)$")
     ax2.set_title("2D TDGL: Monotonic Free Energy Dissipation")
@@ -261,8 +262,8 @@ def plot_convergence(
     p_linf = conv_data["p_linf"]
 
     fig, ax = plt.subplots(figsize=(6.5, 4.5))
-    ax.loglog(dx, l2_err, "o-", color="#1f77b4", lw=2.0, label=f"$L_2$ Norm (fitted slope $p = {p_l2:.2f}$)")
-    ax.loglog(dx, linf_err, "s--", color="#ff7f0e", lw=1.8, label=f"$L_\\infty$ Norm (fitted slope $p = {p_linf:.2f}$)")
+    ax.loglog(dx, l2_err, "o-", color=MEAN, lw=2.0, label=f"$L_2$ Norm (fitted slope $p = {p_l2:.2f}$)")
+    ax.loglog(dx, linf_err, "s--", color=MAX_ERROR, lw=1.8, label=f"$L_\\infty$ Norm (fitted slope $p = {p_linf:.2f}$)")
     
     # Reference quadratic slope line
     ref_dx = np.array([dx[0], dx[-1]])
@@ -293,11 +294,11 @@ def plot_spectra(
     
     # 1D plot
     valid_1d = (k_1d > 0.05) & (k_1d < 3.0) & (E_1d > 0)
-    ax1.loglog(k_1d[k_1d > 0], E_1d[k_1d > 0], "o", color="#1f77b4", ms=3.5, alpha=0.7, label=r"Measured $E(k)$")
+    ax1.loglog(k_1d[k_1d > 0], E_1d[k_1d > 0], "o", color=HARDENED, ms=3.5, alpha=0.7, label=r"Measured $E(k)$")
     if not np.isnan(fit_1d["exponent"]):
-        fit_k = np.linspace(0.1, 2.0, 50)
+        fit_k = np.linspace(fit_1d["k_min"], fit_1d["k_max"], 50)
         fit_E = fit_1d["amplitude"] * (fit_k ** fit_1d["exponent"])
-        ax1.loglog(fit_k, fit_E, "r-", lw=2.2, label=f"Fit: $k^{{{fit_1d['exponent']:.2f}}}$ (Porod $k^{{-2}}$)")
+        ax1.loglog(fit_k, fit_E, "--", color=REFERENCE, lw=2.2, label=f"Fit: $k^{{{fit_1d['exponent']:.2f}}}$ (Porod $k^{{-2}}$)")
     ax1.set_xlabel(r"Wavenumber $k$")
     ax1.set_ylabel(r"Modal Energy $E(k, t)$")
     ax1.set_title(r"1D TDGL Energy Spectrum ($D=1$)")
@@ -305,11 +306,11 @@ def plot_spectra(
 
     # 2D plot
     valid_2d = (k_2d > 0.1) & (k_2d < 2.5) & (E_2d_modal > 0)
-    ax2.loglog(k_2d[k_2d > 0], E_2d_modal[k_2d > 0], "s", color="#2ca02c", ms=4, alpha=0.7, label=r"Measured $E_{\mathrm{modal}}(k)$")
+    ax2.loglog(k_2d[k_2d > 0], E_2d_modal[k_2d > 0], "s", color=HARDENED, ms=4, alpha=0.7, label=r"Measured $E_{\mathrm{modal}}(k)$")
     if not np.isnan(fit_2d["exponent"]):
-        fit_k2 = np.linspace(0.15, 1.8, 50)
+        fit_k2 = np.linspace(fit_2d["k_min"], fit_2d["k_max"], 50)
         fit_E2 = fit_2d["amplitude"] * (fit_k2 ** fit_2d["exponent"])
-        ax2.loglog(fit_k2, fit_E2, "b-", lw=2.2, label=f"Fit: $k^{{{fit_2d['exponent']:.2f}}}$ (Porod $k^{{-3}}$)")
+        ax2.loglog(fit_k2, fit_E2, "--", color=REFERENCE, lw=2.2, label=f"Fit: $k^{{{fit_2d['exponent']:.2f}}}$ (Porod $k^{{-3}}$)")
     ax2.set_xlabel(r"Wavenumber $k$")
     ax2.set_ylabel(r"Angle-Averaged Modal Energy $E_{\mathrm{modal}}(k)$")
     ax2.set_title(r"2D TDGL Energy Spectrum ($D=2$)")

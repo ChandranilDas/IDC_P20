@@ -4,7 +4,7 @@ Executed finite-difference simulations of the real scalar, nonconserved Model-A 
 
 $$\partial_t\phi=\phi-\phi^3+\nabla^2\phi.$$
 
-Antigravity produced the numerical implementation. Codex independently audited the equations, discretization, saved fields, diagnostics and deliverables, and corrected issues found during review. The allocation image and two professor-provided papers are the project sources. There is no external dataset.
+The allocation image and two professor-provided papers are the project sources. There is no external dataset.
 
 [Live laboratory](https://idc-p20.vercel.app) · [GitHub source](https://github.com/ChandranilDas/IDC_P20) · [CV summary](docs/PORTFOLIO.md)
 
@@ -21,14 +21,6 @@ Antigravity produced the numerical implementation. Codex independently audited t
 - [Execution record](audit/EXECUTION_RECORD.md)
 - [Independent full replay](audit/independent_full_replay.json)
 
-## Synchronized release
-
-The report, final deck, executed notebook and app Saved Results use the same archived numerical fields. `results/reference_results.json` records their exact summaries and source hashes. `python scripts/sync_release.py --check` verifies current artifact copies. The web downloads match these current files.
-
-The app live reference presets use the archived seed-42 initial fields at the matching full reference geometries. Their default endpoints are shorter (t=40 / t=25) than the full archived runs (t=1000 / t=100). Other live configurations use the labelled browser generator. Compare runs at equal initial fields, grid, time step and time.
-
-- [Executed simulation notebook](notebooks/P20_Simulations.ipynb)
-- [Exact reference summaries](results/reference_results.json)
 
 ## Executed experiments
 
@@ -85,7 +77,7 @@ A single tanh kink is not periodic. `experiments/run_1d_kink.py` evaluates its i
 
 The figures include initial fields, 1D curves and space–time diagram, pair annihilation, 2D snapshots, energy decay, kink comparison, convergence, workflow and optional spectra.
 
-To rebuild the audited report and slide plot assets from saved numerical results:
+To rebuild the technical report and slide plot assets from saved numerical results:
 
 ```sh
 python docs/build_audited_report.py
@@ -113,7 +105,7 @@ A static scientific web instrument is provided under `web/` (built with Vite, Re
 - **Scientific Field Notebook Aesthetic**: Restrained editorial design using warm off-white paper (`#f5f3ed`), near-black ink (`#20241f`), warm gray hairlines (`#d8d8cd`), and deep forest green accents (`#315646`), replacing generic SaaS dashboard patterns with an authentic scientific worksheet ledger.
 - **Dedicated Web Worker Integration**: Continuous explicit Forward Euler numerical integration executed off the main thread with typed `Float64Array` buffers.
 - **Interactive Stencil Inspector**: Point-wise finite-difference ledger displaying local periodic neighbors, discrete Laplacians, nonlinear reactions, Euler increments ($\Delta t$), and predicted next states.
-- **Saved Reference Playback**: Byte-level playback of audited Float64 binary archives exported from verified Python runs: 1D quench ($t=0 \to 1000$), 2D domain coarsening ($t=0 \to 100$), and 1D kink-antikink annihilation ($t=0 \to 800$, $R_0=7.0$).
+- **Saved Reference Playback**: Playback of full Python simulation results: 1D quench ($t=0 \to 1000$), 2D domain coarsening ($t=0 \to 100$), and 1D kink-antikink annihilation ($t=0 \to 800$, $R_0=7.0$).
 - **Rigorous Verification & Acceptance**: Verified across 70 Vitest tests (including 7 independent mounted UI acceptance tests in JSDOM and 7 independent scientific evidence integrity tests) and 13 Pytest tests.
 - **Reproducible Setup & Local Dev**:
   ```sh

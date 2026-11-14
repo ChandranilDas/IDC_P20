@@ -27,6 +27,7 @@ from PIL import Image
 # Ensure project root is in sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from src.plot_style import FIELD, FIELD_CMAP, RMS, REFERENCE
 from src.tdgl_core import TDGL1DConfig
 from src.initial_conditions import make_random_ic_1d
 from src.tdgl_1d import simulate_1d
@@ -160,7 +161,7 @@ def run():
     for i in range(0, len(snaps), anim_subsample):
         ax.clear()
         t_curr = t_snaps[i]
-        ax.plot(x, snaps[i], color="#1f77b4", lw=1.8)
+        ax.plot(x, snaps[i], color=FIELD, lw=1.8)
         ax.axhline(+1.0, color="gray", ls="--", alpha=0.5)
         ax.axhline(-1.0, color="gray", ls="--", alpha=0.5)
         ax.axhline(0.0, color="k", ls=":", alpha=0.3)
