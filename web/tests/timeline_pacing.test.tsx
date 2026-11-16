@@ -1,0 +1,12 @@
+import {useState} from 'react';
+import {render,fireEvent,act,cleanup} from '@testing-library/react';
+import {afterEach,beforeEach,it,expect,vi} from 'vitest';
+import {TimelineScrubber} from '../src/components/TimelineScrubber';
+beforeEach(()=>vi.useFakeTimers());
+afterEach(()=>{cleanup();vi.useRealTimers();});
+function Harness(){const [idx,setIdx]=useState(0);return <><output data-testid="idx">{idx}</output><TimelineScrubber currentIndex={idx} totalSnapshots={4} snapshotTimes={[0,.1,2,5]} currentTime={[0,.1,2,5][idx]} totalDuration={5} onSeek={setIdx}/></>;}
+it('replays nonuniform timestamps at one simulation unit per second and shows the final frame',()=>{const r=render(<Harness/>);fireEvent.click(r.getByTitle('Play Trajectory'));act(()=>vi.advanceTimersByTime(1000));expect(r.getByTestId('idx').textContent).toBe('1');act(()=>vi.advanceTimersByTime(1100));expect(r.getByTestId('idx').textContent).toBe('2');act(()=>vi.advanceTimersByTime(3000));expect(r.getByTestId('idx').textContent).toBe('3');});
+it('uses the speed buttons for elapsed simulation time',()=>{const r=render(<Harness/>);fireEvent.click(r.getByText('2×'));fireEvent.click(r.getByTitle('Play Trajectory'));act(()=>vi.advanceTimersByTime(1100));expect(r.getByTestId('idx').textContent).toBe('2');});
+it('freezes replay while paused and preserves elapsed time between sparse frames',()=>{const r=render(<Harness/>);fireEvent.click(r.getByTitle('Play Trajectory'));act(()=>vi.advanceTimersByTime(500));fireEvent.click(r.getByTitle('Pause Playback'));act(()=>vi.advanceTimersByTime(10000));expect(r.getByTestId('idx').textContent).toBe('1');fireEvent.click(r.getByTitle('Play Trajectory'));act(()=>vi.advanceTimersByTime(1600));expect(r.getByTestId('idx').textContent).toBe('2');});
+it('rebases speed without restarting or jumping ahead',()=>{const r=render(<Harness/>);fireEvent.click(r.getByTitle('Play Trajectory'));act(()=>vi.advanceTimersByTime(1000));fireEvent.click(r.getByText('2×'));act(()=>vi.advanceTimersByTime(600));expect(r.getByTestId('idx').textContent).toBe('2');});
+it('uses elapsed time after a delayed callback rather than slowing replay by frame count',()=>{const r=render(<Harness/>);fireEvent.click(r.getByTitle('Play Trajectory'));const base=performance.now();vi.spyOn(performance,'now').mockReturnValue(base+6000);act(()=>vi.advanceTimersByTime(100));expect(r.getByTestId('idx').textContent).toBe('3');vi.restoreAllMocks();});

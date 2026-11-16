@@ -83,6 +83,9 @@ export const SimulationLab: React.FC = () => {
   const [snapshots, setSnapshots] = useState<SnapshotRecord[]>([]);
   const [activeSnapshotIdx, setActiveSnapshotIdx] = useState<number>(0);
   const [workerError, setWorkerError] = useState<string | null>(null);
+  const [speed, setSpeed] = useState<number>(1);
+  const speedRef = useRef<number>(1);
+  speedRef.current = speed;
 
   // Inspector point coordinates
   const [selectedI, setSelectedI] = useState<number>(512);
@@ -277,7 +280,11 @@ export const SimulationLab: React.FC = () => {
         if (autoStartOnNextInitRef.current) {
           autoStartOnNextInitRef.current = false;
           setStatus('running');
-          workerRef.current?.postMessage({ type: 'START', runId: msg.runId } as WorkerInMessage);
+          workerRef.current?.postMessage({
+            type: 'START',
+            runId: msg.runId,
+            speed: speedRef.current,
+          } as WorkerInMessage);
         }
       } else if (msg.type === 'TICK') {
         if (msg.field.length !== expectedTotal) return;
@@ -411,6 +418,18 @@ export const SimulationLab: React.FC = () => {
     valResult.isValid,
   ]);
 
+  const handleSpeedChange = (newSpeed: number) => {
+    setSpeed(newSpeed);
+    speedRef.current = newSpeed;
+    if (workerRef.current && runIdRef.current) {
+      workerRef.current.postMessage({
+        type: 'SET_SPEED',
+        runId: runIdRef.current,
+        speed: newSpeed,
+      } as WorkerInMessage);
+    }
+  };
+
   // Simulation Controls
   const handleStart = () => {
     if (!valResult.isValid || workerError) return;
@@ -422,10 +441,18 @@ export const SimulationLab: React.FC = () => {
     if (!displayBundle) return;
     if (status === 'idle') {
       setStatus('running');
-      workerRef.current?.postMessage({ type: 'START', runId: runIdRef.current } as WorkerInMessage);
+      workerRef.current?.postMessage({
+        type: 'START',
+        runId: runIdRef.current,
+        speed: speedRef.current,
+      } as WorkerInMessage);
     } else if (status === 'paused') {
       setStatus('running');
-      workerRef.current?.postMessage({ type: 'RESUME', runId: runIdRef.current } as WorkerInMessage);
+      workerRef.current?.postMessage({
+        type: 'RESUME',
+        runId: runIdRef.current,
+        speed: speedRef.current,
+      } as WorkerInMessage);
     } else if (status === 'completed') {
       handleReset(true);
     }
@@ -1088,12 +1115,16 @@ export const SimulationLab: React.FC = () => {
             {/* Timeline Scrubber */}
             <div style={{ marginTop: '0.65rem' }}>
               <TimelineScrubber
+                key={displayBundle?.runId ?? "empty"}
                 currentIndex={activeSnapshotIdx}
                 totalSnapshots={snapshots.length}
                 currentTime={displayDiag ? displayDiag.time : 0}
                 totalDuration={effectiveConfig.duration}
                 onSeek={handleSeek}
                 disabled={status === 'running'}
+                snapshotTimes={snapshots.map((s) => s.time)}
+                speed={speed}
+                onSpeedChange={handleSpeedChange}
               />
             </div>
           </div>

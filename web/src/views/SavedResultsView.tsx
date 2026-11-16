@@ -469,10 +469,12 @@ export const SavedResultsView: React.FC = () => {
         {/* Timeline Scrubber */}
         <div style={{ marginTop: '0.65rem' }}>
           <TimelineScrubber
+            key={selectedRunId}
             currentIndex={currentFrameIdx}
             totalSnapshots={run.num_snapshots}
             currentTime={currentTime}
             totalDuration={run.t_snapshots[run.t_snapshots.length - 1] ?? run.L}
+            snapshotTimes={run.t_snapshots}
             onSeek={(idx) => {
               if (idx >= 0 && idx < run.num_snapshots) {
                 setCurrentFrameIdx(idx);

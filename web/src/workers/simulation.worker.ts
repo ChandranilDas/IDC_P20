@@ -20,9 +20,10 @@ import {
 
 export type WorkerInMessage =
   | { type: 'INIT'; runId: string; config: SimulationConfig }
-  | { type: 'START'; runId: string }
+  | { type: 'START'; runId: string; speed?: number }
   | { type: 'PAUSE'; runId: string }
-  | { type: 'RESUME'; runId: string }
+  | { type: 'RESUME'; runId: string; speed?: number }
+  | { type: 'SET_SPEED'; runId: string; speed: number }
   | { type: 'RESET'; runId: string }
   | { type: 'STEP_ONCE'; runId: string };
 
@@ -72,6 +73,18 @@ let snapshotIntervalSteps = 1;
 let lastSnapshotStep = 0;
 let lastUiPostWallTime = 0;
 let isRunning = false;
+let speed = 1;
+let anchorWallTime = 0;
+let anchorSimTime = 0;
+function rebaseClock() {
+  anchorWallTime = performance.now();
+  anchorSimTime = currentStep * (currentConfig?.dt ?? 0);
+}
+function setSpeed(value: number) {
+  if (![0.5, 1, 2, 5].includes(value)) throw new Error('Unsupported playback speed.');
+  speed = value;
+  rebaseClock();
+}
 let timerId: any = null;
 
 function stopLoop() {
@@ -120,7 +133,9 @@ function runBatch() {
     let batchSteps = 0;
     // Compute for a short wall-clock slice, then yield to PAUSE/RESET messages.
     // There is no total-work or duration cutoff.
-    while (currentStep < totalSteps) {
+    const targetStep = Math.min(totalSteps, Math.floor(
+      (anchorSimTime + Math.max(0, started - anchorWallTime) * speed / 1000) / cfg.dt + 1e-9));
+    while (currentStep < targetStep) {
       if (cfg.dimension === 1) {
         eulerStep1D(currentPhi, cfg.dx, cfg.dt, scratchRhs, currentPhi);
       } else {
@@ -137,14 +152,14 @@ function runBatch() {
     }
     const isSnapshot = currentStep - lastSnapshotStep >= snapshotIntervalSteps;
     const now = performance.now();
-    if (isSnapshot || now - lastUiPostWallTime >= 100) {
+    if (isSnapshot || now - lastUiPostWallTime >= 33) {
       if (isSnapshot) lastSnapshotStep = currentStep;
       lastUiPostWallTime = now;
       publishField('TICK', isSnapshot);
     } else {
       checkFiniteField();
     }
-    if (isRunning) timerId = setTimeout(runBatch, 0);
+    if (isRunning) timerId = setTimeout(runBatch, 16);
   } catch (error) {
     failRun(error);
   }
@@ -160,6 +175,8 @@ self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
       activeRunId = msg.runId;
       currentConfig = msg.config;
       currentStep = 0;
+      speed = 1;
+      rebaseClock();
       totalSteps = Math.max(1, Math.ceil(msg.config.duration / msg.config.dt));
 
       // Target ~200 snapshots across the run
@@ -198,9 +215,17 @@ self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
     case 'RESUME': {
       if (msg.runId !== activeRunId) return;
       if (!isRunning && currentPhi && currentConfig) {
+        if (msg.speed !== undefined) setSpeed(msg.speed);
+        rebaseClock();
         isRunning = true;
-        timerId = setTimeout(runBatch, 0);
+        timerId = setTimeout(runBatch, 16);
       }
+      break;
+    }
+
+    case 'SET_SPEED': {
+      if (msg.runId !== activeRunId) return;
+      setSpeed(msg.speed);
       break;
     }
 
@@ -276,6 +301,8 @@ self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
       currentPhi = null;
       scratchRhs = null;
       currentStep = 0;
+      speed = 1;
+      rebaseClock();
       totalSteps = 0;
       self.postMessage({
         type: 'RESET_ACK',

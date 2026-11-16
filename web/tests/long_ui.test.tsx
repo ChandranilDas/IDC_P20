@@ -51,3 +51,11 @@ describe('Actual long-run controls and recovery',()=>{
   expect(document.body.textContent).toContain('0.000');
  });
 });
+it('sends the selected speed to the live worker before and during a run',async()=>{
+ render(<SimulationLab/>);const w=TestWorker.instances.at(-1)!;await act(async()=>w.initialized());
+ fireEvent.click(screen.getByRole('button',{name:'2×'}));
+ fireEvent.click(screen.getByRole('button',{name:'Start'}));
+ expect(w.sent.filter(m=>m.type==='START').at(-1).speed).toBe(2);
+ fireEvent.click(screen.getByRole('button',{name:'0.5×'}));
+ expect(w.sent.filter(m=>m.type==='SET_SPEED').at(-1).speed).toBe(.5);
+});
