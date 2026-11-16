@@ -1,3 +1,4 @@
+import {SavedResearchPlots} from '../components/SavedResearchPlots';
 import React, { useState, useEffect, useRef } from 'react';
 import { FieldCanvas } from '../components/FieldCanvas';
 import { InspectorCard } from '../components/InspectorCard';
@@ -308,6 +309,7 @@ export const SavedResultsView: React.FC = () => {
 
           {/* Dataset Selector Buttons */}
           <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+            <button className="btn btn-secondary btn-sm" onClick={() => document.getElementById('saved-evolution-figures')?.scrollIntoView({behavior:'smooth',block:'start'})}>Trajectory figures ↓</button>
             {Object.values(manifest.runs).map((r) => (
               <button
                 key={r.id}
@@ -523,6 +525,7 @@ export const SavedResultsView: React.FC = () => {
           </div>
         </div>
       </details>
+      {loadedBuffer && isBufferLoadedForSelectedRun && <SavedResearchPlots run={run} buffer={loadedBuffer.buffer} />}
     </div>
   );
 };

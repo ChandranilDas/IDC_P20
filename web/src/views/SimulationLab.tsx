@@ -15,6 +15,7 @@ import { WorkerInMessage, WorkerOutMessage } from '../workers/simulation.worker'
 import { FieldCanvas } from '../components/FieldCanvas';
 import { InspectorCard } from '../components/InspectorCard';
 import { DiagnosticsPlot } from '../components/DiagnosticsPlot';
+import { ResearchPlots } from '../components/ResearchPlots';
 import { TimelineScrubber } from '../components/TimelineScrubber';
 import {
   Play,
@@ -529,6 +530,18 @@ export const SimulationLab: React.FC = () => {
   const displayField = displayBundle ? displayBundle.field : null;
   const displayDiag = displayBundle ? displayBundle.diagnostics : null;
 
+  // Use only fields actually reached at the displayed simulation time.
+  const researchSnapshots = useMemo(() => {
+    if (!displayBundle) return [];
+    const current = displayBundle.diagnostics;
+    const recorded = snapshots.filter(s => s.step <= current.step);
+    if (recorded.at(-1)?.step !== current.step) {
+      return [...recorded, { time: current.time, step: current.step,
+        field: displayBundle.field, diagnostics: current }];
+    }
+    return recorded;
+  }, [snapshots, displayBundle]);
+
   // Export handlers
   const exportJSON = () => {
     if (!displayField || !displayDiag) return;
@@ -564,15 +577,11 @@ export const SimulationLab: React.FC = () => {
 
   const exportCSV = () => {
     if (snapshots.length === 0) return;
-    const header = 'step,time,free_energy,mean_phi,mean_phi2,min_phi,max_phi\n';
-    const rows = snapshots
-      .map(
-        (s) =>
-          `${s.step},${s.time.toFixed(4)},${s.diagnostics.freeEnergy.toFixed(6)},${s.diagnostics.meanPhi.toFixed(
-            6
-          )},${s.diagnostics.meanPhi2.toFixed(6)},${s.diagnostics.minPhi.toFixed(6)},${s.diagnostics.maxPhi.toFixed(6)}`
-      )
-      .join('\n');
+    const header = 'step,time,free_energy,mean_phi,mean_phi2,min_phi,max_phi,free_energy_density,ordering_measure\n';
+    const rows = snapshots.map(s => [s.step, s.time, s.diagnostics.freeEnergy,
+      s.diagnostics.meanPhi, s.diagnostics.meanPhi2, s.diagnostics.minPhi, s.diagnostics.maxPhi,
+      s.diagnostics.freeEnergy / effectiveConfig.L ** effectiveConfig.dimension,
+      s.diagnostics.meanPhi2 / 2].join(',')).join('\n');
     const blob = new Blob([header + rows], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -986,7 +995,9 @@ export const SimulationLab: React.FC = () => {
                 )}
               </div>
 
-              <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <button className="btn btn-secondary btn-sm" disabled={!displayBundle}
+                  onClick={() => document.getElementById('evolution-figures')?.scrollIntoView({behavior:'smooth',block:'start'})}>Evolution figures ↓</button>
                 {status === 'running' ? (
                   <button
                     className="btn btn-secondary btn-sm"
@@ -1137,6 +1148,7 @@ export const SimulationLab: React.FC = () => {
             nextSnapInterval={nextSnapInterval}
             isFinalFrame={isFinalFrame}
           />
+          {displayBundle && <div id="evolution-figures" style={{scrollMarginTop:'5rem'}}><ResearchPlots config={effectiveConfig} snapshots={researchSnapshots} /></div>}
         </main>
       </div>
     </div>

@@ -10,7 +10,7 @@ class TestWorker {
  emit(m:any){this.onmessage?.({data:m});}
  initialized(){const m=this.init(),c=m.config;const field=new Float64Array(c.dimension===1?c.Nx:c.Nx*c.Ny).fill(.1);this.emit({type:'INITIALIZED',runId:m.runId,field,diagnostics:computeDiagnostics(field,c.dx,c.dimension,c.Nx,c.Ny,0,0)});return {m,field};}
 }
-beforeEach(()=>{TestWorker.instances=[];vi.stubGlobal('Worker',TestWorker);});afterEach(()=>{cleanup();vi.unstubAllGlobals();});
+beforeEach(()=>{vi.spyOn(HTMLCanvasElement.prototype,'getContext').mockReturnValue(null);TestWorker.instances=[];vi.stubGlobal('Worker',TestWorker);});afterEach(()=>{cleanup();vi.unstubAllGlobals();vi.restoreAllMocks();});
 describe('Actual long-run controls and recovery',()=>{
  it('accepts long live duration and surfaces a worker failure without automatically restarting',async()=>{
   render(<SimulationLab/>);const w=TestWorker.instances.at(-1)!;await act(async()=>w.initialized());

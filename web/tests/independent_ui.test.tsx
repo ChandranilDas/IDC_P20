@@ -16,8 +16,8 @@ class ControlledWorker {
  initMessages(){return this.sent.filter(m=>m.type==='INIT');}
  initialized(message:any){const c=message.config; const field=new Float64Array(c.dimension===1?c.Nx:c.Nx*c.Ny).fill(.1);this.onmessage?.({data:{type:'INITIALIZED',runId:message.runId,field,diagnostics:computeDiagnostics(field,c.dx,c.dimension,c.Nx,c.Ny,0,0,c.dy)}});}
 }
-beforeEach(()=>{ControlledWorker.instances=[];vi.stubGlobal('Worker',ControlledWorker);});
-afterEach(()=>{cleanup();vi.unstubAllGlobals();});
+beforeEach(()=>{vi.spyOn(HTMLCanvasElement.prototype,'getContext').mockReturnValue(null);ControlledWorker.instances=[];vi.stubGlobal('Worker',ControlledWorker);});
+afterEach(()=>{cleanup();vi.unstubAllGlobals();vi.restoreAllMocks();});
 const latest=()=>ControlledWorker.instances.at(-1)!;
 const acknowledge=async()=>{const w=latest();const init=w.initMessages().at(-1);expect(init).toBeDefined();await act(async()=>w.initialized(init));return init;};
 describe('Independent actual mounted SimulationLab acceptance',()=>{

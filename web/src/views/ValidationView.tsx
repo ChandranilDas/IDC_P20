@@ -1,3 +1,4 @@
+import {ValidationFigures} from '../components/ValidationFigures';
 import React, { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 
@@ -468,6 +469,8 @@ export const ValidationView: React.FC = () => {
       </div>
 
       {/* Deep-Dive Sections */}
+      <ValidationFigures />
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem', alignItems: 'start' }}>
         {/* Replay Details Panel */}
         <div className="notebook-panel">
