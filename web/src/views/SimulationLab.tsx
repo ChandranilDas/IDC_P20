@@ -384,7 +384,8 @@ export const SimulationLab: React.FC = () => {
   // Auto-init strictly when draft parameters change while idle
   useEffect(() => {
     if (status === 'idle' && valResult.isValid && !workerError) {
-      if (deferPreview && !autoStartOnNextInitRef.current) {
+      if (deferPreview && autoStartOnNextInitRef.current) return;
+      if (deferPreview) {
         workerRef.current?.postMessage({ type: 'RESET', runId: runIdRef.current } as WorkerInMessage);
         setDisplayBundle(null);
         setSnapshots([]);
@@ -426,8 +427,7 @@ export const SimulationLab: React.FC = () => {
       setStatus('running');
       workerRef.current?.postMessage({ type: 'RESUME', runId: runIdRef.current } as WorkerInMessage);
     } else if (status === 'completed') {
-      autoStartOnNextInitRef.current = true;
-      handleReset();
+      handleReset(true);
     }
   };
 
@@ -441,14 +441,22 @@ export const SimulationLab: React.FC = () => {
     workerRef.current?.postMessage({ type: 'STEP_ONCE', runId: runIdRef.current } as WorkerInMessage);
   };
 
-  const handleReset = () => {
+  const handleReset = (startAfterReset = false) => {
+    autoStartOnNextInitRef.current = startAfterReset;
     setStatus('idle');
     setWorkerError(null);
     setDisplayBundle(null);
     setSnapshots([]);
     setActiveSnapshotIdx(0);
     workerRef.current?.postMessage({ type: 'RESET', runId: runIdRef.current } as WorkerInMessage);
-    if (!deferPreview) initSimulation();
+    if (!deferPreview || startAfterReset) {
+      initSimulation();
+    } else {
+      // Invalidate in-flight initialization/results even when no replacement field is allocated.
+      runIdRef.current = `reset_${Date.now()}_${++runCounter}`;
+      activeConfigRef.current = null;
+      setActiveConfig(null);
+    }
   };
 
   // Timeline seeking
@@ -981,7 +989,7 @@ export const SimulationLab: React.FC = () => {
                 </button>
                 <button
                   className="btn btn-secondary btn-sm"
-                  onClick={handleReset}
+                  onClick={() => handleReset()}
                   title="Reset Simulation"
                   aria-label="Reset Simulation"
                 >

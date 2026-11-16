@@ -32,6 +32,9 @@ describe('Actual long-run controls and recovery',()=>{
   expect(w.sent.some(m=>m.type==='INIT'&&m.config.N===8192)).toBe(false);
   const start=screen.getByRole('button',{name:'Start'});expect(start.hasAttribute('disabled')).toBe(false);
   fireEvent.click(start);expect(w.init().config.N).toBe(8192);
+  const allocating=w.init();fireEvent.click(screen.getByRole('button',{name:'Reset Simulation'}));
+  await act(async()=>w.emit({type:'ERROR',runId:allocating.runId,message:'Obsolete allocation error'}));
+  expect(document.body.textContent).not.toContain('Obsolete allocation error');
  });
  it('retains the first and latest field under adaptive snapshot thinning',async()=>{
   render(<SimulationLab/>);const w=TestWorker.instances.at(-1)!;await act(async()=>w.initialized());
