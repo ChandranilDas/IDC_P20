@@ -82,84 +82,78 @@ function stopLoop() {
   }
 }
 
+/** Fail visibly instead of publishing a non-finite field as a completed run. */
+function failRun(error: unknown) {
+  stopLoop();
+  const message = error instanceof Error ? error.message : String(error);
+  self.postMessage({ type: 'ERROR', runId: activeRunId, message } as WorkerOutMessage);
+}
+
+function checkFiniteField() {
+  if (!currentPhi) return;
+  for (let i = 0; i < currentPhi.length; i++) {
+    if (!Number.isFinite(currentPhi[i])) {
+      throw new Error('The numerical field became non-finite. Reset and reduce the time step or initial amplitude.');
+    }
+  }
+}
+
+function publishField(type: 'TICK' | 'COMPLETED', isSnapshot = false) {
+  if (!currentConfig || !currentPhi) return;
+  checkFiniteField();
+  const cfg = currentConfig;
+  const diagnostics = computeDiagnostics(currentPhi, cfg.dx, cfg.dimension, cfg.Nx, cfg.Ny,
+    currentStep * cfg.dt, currentStep, cfg.dy);
+  if (!Object.values(diagnostics).every(Number.isFinite)) {
+    throw new Error('A numerical diagnostic overflowed. Reset with smaller amplitudes or a better-resolved configuration.');
+  }
+  const field = currentPhi.slice();
+  // Transfer the display copy; the integrator keeps its own working field.
+  self.postMessage({ type, runId: activeRunId, field, diagnostics, isSnapshot }, { transfer: [field.buffer] });
+}
+
 function runBatch() {
   if (!isRunning || !currentConfig || !currentPhi || !scratchRhs) return;
-
-  const cfg = currentConfig;
-  const stepsPerBatch = cfg.dimension === 1 ? 50 : 15;
-
-  for (let s = 0; s < stepsPerBatch; s++) {
+  try {
+    const cfg = currentConfig;
+    const started = performance.now();
+    let batchSteps = 0;
+    // Compute for a short wall-clock slice, then yield to PAUSE/RESET messages.
+    // There is no total-work or duration cutoff.
+    while (currentStep < totalSteps) {
+      if (cfg.dimension === 1) {
+        eulerStep1D(currentPhi, cfg.dx, cfg.dt, scratchRhs, currentPhi);
+      } else {
+        eulerStep2D(currentPhi, cfg.Nx, cfg.Ny, cfg.dx, cfg.dt, cfg.dy, scratchRhs, currentPhi);
+      }
+      currentStep++;
+      batchSteps++;
+      if (batchSteps % 8 === 0 && performance.now() - started >= 8) break;
+    }
     if (currentStep >= totalSteps) {
       stopLoop();
-      const finalTime = currentStep * cfg.dt;
-      const diag = computeDiagnostics(
-        currentPhi,
-        cfg.dx,
-        cfg.dimension,
-        cfg.Nx,
-        cfg.Ny,
-        finalTime,
-        currentStep,
-        cfg.dy
-      );
-      self.postMessage({
-        type: 'COMPLETED',
-        runId: activeRunId,
-        field: currentPhi.slice(),
-        diagnostics: diag,
-      } as WorkerOutMessage);
+      publishField('COMPLETED');
       return;
     }
-
-    if (cfg.dimension === 1) {
-      eulerStep1D(currentPhi, cfg.dx, cfg.dt, scratchRhs, currentPhi);
+    const isSnapshot = currentStep - lastSnapshotStep >= snapshotIntervalSteps;
+    const now = performance.now();
+    if (isSnapshot || now - lastUiPostWallTime >= 100) {
+      if (isSnapshot) lastSnapshotStep = currentStep;
+      lastUiPostWallTime = now;
+      publishField('TICK', isSnapshot);
     } else {
-      eulerStep2D(currentPhi, cfg.Nx, cfg.Ny, cfg.dx, cfg.dt, cfg.dy, scratchRhs, currentPhi);
+      checkFiniteField();
     }
-
-    currentStep++;
-  }
-
-  const curSimTime = currentStep * cfg.dt;
-  const isSnap =
-    currentStep - lastSnapshotStep >= snapshotIntervalSteps || currentStep >= totalSteps;
-  const nowWall = performance.now();
-  const shouldPostUi = isSnap || nowWall - lastUiPostWallTime >= 33.3; // ~30 FPS UI throttle
-
-  if (isSnap) {
-    lastSnapshotStep = currentStep;
-  }
-
-  if (shouldPostUi) {
-    lastUiPostWallTime = nowWall;
-    const diag = computeDiagnostics(
-      currentPhi,
-      cfg.dx,
-      cfg.dimension,
-      cfg.Nx,
-      cfg.Ny,
-      curSimTime,
-      currentStep,
-      cfg.dy
-    );
-
-    self.postMessage({
-      type: 'TICK',
-      runId: activeRunId,
-      field: currentPhi.slice(),
-      diagnostics: diag,
-      isSnapshot: isSnap,
-    } as WorkerOutMessage);
-  }
-
-  if (isRunning) {
-    timerId = setTimeout(runBatch, 0);
+    if (isRunning) timerId = setTimeout(runBatch, 0);
+  } catch (error) {
+    failRun(error);
   }
 }
 
 self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
   const msg = e.data;
 
+  try {
   switch (msg.type) {
     case 'INIT': {
       stopLoop();
@@ -176,6 +170,7 @@ self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
 
       const total = msg.config.dimension === 1 ? msg.config.N : msg.config.Nx * msg.config.Ny;
       currentPhi = generateInitialCondition(msg.config);
+      checkFiniteField();
       scratchRhs = new Float64Array(total);
 
       const diag = computeDiagnostics(
@@ -189,6 +184,7 @@ self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
         msg.config.dy
       );
 
+      if (!Object.values(diag).every(Number.isFinite)) throw new Error('Initial diagnostics overflowed; reduce the initial amplitude or grid size.');
       self.postMessage({
         type: 'INITIALIZED',
         runId: activeRunId,
@@ -244,6 +240,7 @@ self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
         eulerStep2D(currentPhi, cfg.Nx, cfg.Ny, cfg.dx, cfg.dt, cfg.dy, scratchRhs, currentPhi);
       }
       currentStep++;
+      checkFiniteField();
       const curSimTime = currentStep * cfg.dt;
 
       const diag = computeDiagnostics(
@@ -256,6 +253,7 @@ self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
         currentStep,
         cfg.dy
       );
+      if (!Object.values(diag).every(Number.isFinite)) throw new Error('Numerical diagnostics overflowed; reduce the time step or initial amplitude.');
       self.postMessage({
         type: 'TICK',
         runId: activeRunId,
@@ -285,5 +283,8 @@ self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
       } as WorkerOutMessage);
       break;
     }
+  }
+  } catch (error) {
+    failRun(error);
   }
 };

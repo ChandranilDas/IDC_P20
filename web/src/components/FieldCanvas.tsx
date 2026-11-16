@@ -164,9 +164,12 @@ export const FieldCanvas: React.FC<FieldCanvasProps> = ({
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, width, height);
 
-      // Y-range: [-1.3, 1.3]
-      const yMin = -1.3;
-      const yMax = 1.3;
+      // Keep ordinary ordering plots comparable, but show larger initial fields in full.
+      let amplitude = 1;
+      for (const value of field) if (Number.isFinite(value)) amplitude = Math.max(amplitude, Math.abs(value));
+      const yMax = Math.max(1.3, amplitude * 1.05);
+      const yMin = -yMax;
+      const yTicks = amplitude > 1.3 ? [-amplitude, 0, amplitude] : [-1, 0, 1];
       const toCanvasY = (val: number) =>
         bounds.plotY + (1.0 - (val - yMin) / (yMax - yMin)) * bounds.plotH;
 
@@ -179,7 +182,7 @@ export const FieldCanvas: React.FC<FieldCanvasProps> = ({
       ctx.lineWidth = 1;
 
       // Horizontal grid lines
-      [-1.0, 0.0, 1.0].forEach((yVal) => {
+      yTicks.forEach((yVal) => {
         const cy = toCanvasY(yVal);
         ctx.beginPath();
         ctx.moveTo(bounds.plotX, cy);
@@ -197,7 +200,7 @@ export const FieldCanvas: React.FC<FieldCanvasProps> = ({
       ctx.fillStyle = '#545a50';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
-      [-1.0, 0.0, 1.0].forEach((yVal) => {
+      yTicks.forEach((yVal) => {
         const cy = toCanvasY(yVal);
         ctx.fillText(yVal.toFixed(1), bounds.plotX - 8, cy);
       });
@@ -290,15 +293,21 @@ export const FieldCanvas: React.FC<FieldCanvasProps> = ({
       // In Python: phi has shape (Nx, Ny). When plotting with imshow(phi.T, origin='lower'),
       // horizontal axis is x in [0, Nx-1], vertical axis is y in [0, Ny-1] with y=0 at bottom.
       // On canvas, y=0 is at top, so canvas row r corresponds to y_idx = Ny - 1 - r.
-      const imgData = ctx.createImageData(Nx, Ny);
+      let amplitude = 1;
+      for (const value of field) if (Number.isFinite(value)) amplitude = Math.max(amplitude, Math.abs(value));
+      // Screen-resolution raster only: integration and exports retain every grid cell.
+      const rasterNx = Math.min(Nx, Math.max(1, Math.ceil(bounds.plotW)));
+      const rasterNy = Math.min(Ny, Math.max(1, Math.ceil(bounds.plotH)));
+      const imgData = ctx.createImageData(rasterNx, rasterNy);
       const data = imgData.data;
 
-      for (let r = 0; r < Ny; r++) {
-        const j = Ny - 1 - r; // invert vertical axis so y=0 is at bottom
-        for (let i = 0; i < Nx; i++) {
-          const val = field[i * Ny + j];
-          const [red, green, blue] = getCoolwarmRGB(val !== undefined && Number.isFinite(val) ? val : 0);
-          const pixelIdx = (r * Nx + i) * 4;
+      for (let r = 0; r < rasterNy; r++) {
+        const j = Ny - 1 - Math.floor((r + 0.5) * Ny / rasterNy); // invert vertical axis so y=0 is at bottom
+        for (let i = 0; i < rasterNx; i++) {
+          const gridI = Math.floor((i + 0.5) * Nx / rasterNx);
+          const val = field[gridI * Ny + j];
+          const [red, green, blue] = getCoolwarmRGB(val !== undefined && Number.isFinite(val) ? val / amplitude : 0);
+          const pixelIdx = (r * rasterNx + i) * 4;
           data[pixelIdx] = red;
           data[pixelIdx + 1] = green;
           data[pixelIdx + 2] = blue;
@@ -308,8 +317,8 @@ export const FieldCanvas: React.FC<FieldCanvasProps> = ({
 
       // Draw ImageData scaled to square plot area via an offscreen canvas
       const offscreen = document.createElement('canvas');
-      offscreen.width = Nx;
-      offscreen.height = Ny;
+      offscreen.width = rasterNx;
+      offscreen.height = rasterNy;
       const offCtx = offscreen.getContext('2d');
       if (offCtx) {
         offCtx.putImageData(imgData, 0, 0);
@@ -375,9 +384,9 @@ export const FieldCanvas: React.FC<FieldCanvasProps> = ({
       ctx.font = '10px "SF Mono", monospace';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText('+1.0', barX + barW + 5, barY + 6);
+      ctx.fillText('+' + amplitude.toPrecision(3), barX + barW + 5, barY + 6);
       ctx.fillText(' 0.0', barX + barW + 5, barY + barH / 2);
-      ctx.fillText('-1.0', barX + barW + 5, barY + barH - 6);
+      ctx.fillText('-' + amplitude.toPrecision(3), barX + barW + 5, barY + barH - 6);
 
       // Colorbar title
       ctx.fillStyle = '#20241f';

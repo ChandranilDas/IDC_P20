@@ -171,7 +171,7 @@ export function getInitialConditionProvenance(cfg: SimulationConfig): InitialCon
       source: 'mulberry32',
       generator: `Biased Field (seed ${cfg.seed})`,
       label: `Biased Mixture (seed ${cfg.seed})`,
-      description: `Uniform random perturbations (|δφ| ≤ ${cfg.noiseAmplitude}) on non-zero background magnetization φ₀ = ${cfg.phi0 || 0.2}.`,
+      description: `Uniform random perturbations (|δφ| ≤ ${cfg.noiseAmplitude}) on non-zero background magnetization φ₀ = ${cfg.phi0}.`,
       isCanonicalReference: false,
     };
   }
@@ -448,7 +448,7 @@ export function generateInitialCondition(cfg: SimulationConfig): Float64Array {
     }
     case 'biased': {
       const eta = cfg.noiseAmplitude;
-      const b0 = cfg.phi0 !== 0.0 ? cfg.phi0 : 0.2;
+      const b0 = cfg.phi0;
       for (let i = 0; i < total; i++) {
         phi[i] = b0 + (rng() * 2.0 - 1.0) * eta;
       }

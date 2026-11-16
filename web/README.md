@@ -17,7 +17,7 @@ The application provides four dedicated views:
   - Bounded snapshot history buffer with timeline scrubber and step-by-step playback.
   - Interactive point-wise numerical update inspector: reveals local $\phi$, periodic stencil neighbors, non-linear reaction $(\phi - \phi^3)$, discrete Laplacian $\nabla^2\phi$, total RHS, Euler increment $\Delta t \cdot \text{RHS}$, and predicted next step. Distinguishes single Euler updates ($\Delta t$) from non-uniform snapshot intervals ($\Delta t_{\text{next\_frame}}$).
   - Export capabilities: JSON field snapshot + active config, CSV diagnostics time series, and reliable canvas PNG capture via Blob delivery.
-  - *Note on Presets*: Browser live simulation presets are calibrated as short interactive demonstrations (1D random quench $t=40$, 2D domain coarsening $t=25$, 1D kink pair $t=40$) to stay safely within browser execution and memory budgets. Full long-duration simulations are provided in the Saved Results view.
+  - *Note on Presets*: Browser live simulation presets are calibrated as short interactive demonstrations (1D random quench $t=40$, 2D domain coarsening $t=25$, 1D kink pair $t=40$) for convenient initial exploration. Users can extend the duration directly; Saved Results also provides stored full trajectories.
 
 - **Saved Results**:
   - Full-resolution Float64 binary datasets (`.bin`) exported directly from Python simulations, preserving complete spatial grids ($1024$ in 1D, $128 \times 128$ in 2D), non-uniform snapshot times,.
@@ -44,10 +44,10 @@ The application provides four dedicated views:
 ## 2. Input Validation & Work Budget Enforcements
 
 All numeric inputs are handled as raw draft strings and parsed strictly without silent truncation (`parseInt`) or fallback defaults (`||`):
-- **Work Budget Cap**: Total computation is bounded by $\text{cells} \times \text{steps} \le 50,000,000$ (50M cell-steps), preventing excessive client resource usage.
-- **Memory Bounding**: Active simulation history is capped at $300$ snapshots (`MAX_SNAPSHOTS = 300`) using strided retention to prevent memory exhaustion.
+- **Long Runs**: No fixed total-work or duration cutoff. The worker integrates in short time slices so pause/reset messages remain responsive. Work and memory estimates are shown before execution.
+- **Playback Memory**: Snapshot retention adapts to grid size with a 64 MiB history target (2–300 fields), preserving the initial and latest fields. The numerical integrator advances every step regardless of playback thinning.
 - **Conservative Stability Bound**: Enforces $\Delta t \le 1 / [3M^2 - 1 + 2D/(\Delta x)^2]$ where $M = \max(1, |\phi_0| + \eta)$, guarding against numerical blowup.
-- **Integer & Range Enforcement**: Seed is strictly validated as an unsigned 32-bit integer $[0, 4294967295]$. Fractional seeds (e.g., `1.5`) are visibly rejected without truncation. System size $L > 0$, grid size $N \in [16, 2048]$ (1D) or $[16, 256]$ (2D), initial bias $|\phi_0| \le 1.0$, and noise amplitude $|\delta\phi| \le 0.5$.
+- **Integer & Range Enforcement**: Seed is strictly validated as an unsigned 32-bit integer $[0, 4294967295]$. Fractional seeds (e.g., `1.5`) are visibly rejected without truncation. System size $L > 0$, integer grid size $N \ge 3$, finite initial bias, and finite nonnegative noise amplitude. Larger amplitudes require a suitably reduced time step.
 - **Atomic Association & Error Boundary**: Prevents dimension-mismatch render crashes across 1D/2D switches and encapsulates views in a recoverable React Error Boundary.
 
 ---
@@ -66,7 +66,7 @@ npm test
 - **Stencils & Numerical Parity**: Exact agreement within $10^{-12}$ against Python fixtures for 1D and 2D Forward Euler steps, discrete Laplacians, and rectangular unequal-spacing grids ($N_x \ne N_y$, $\Delta x \ne \Delta y$).
 - **Analytical Fixed Points & Periodic Wrap**: Invariance of $\phi = \pm 1$ and boundary wrapping.
 - **Energy Monotonicity**: Verifies step-by-step free energy decay on multi-step trajectories.
-- **Input Validation**: Rejection of decimals in integers, empty inputs, negative values, and budget exceedances without silent fallback.
+- **Input Validation**: Rejection of decimals in integers, empty inputs, invalid signs, and unrepresentable step counts without silent fallback.
 - **Worker Cadence & Lifecycle**: Atomic message filtering, non-snapshot progress reporting, and pause/reset acknowledgments.
 - **Transitions & Error Boundary**: 1D $\leftrightarrow$ 2D state transitions, shape mismatch guards, defensive inspector formatting, and mounted error boundary recovery.
 - **Physical Geometry & Mobile Transport**: Shared plot-bounds computation ensuring identical geometry between canvas drawing and pointer-to-grid mapping; square 2D stage with aligned colorbar; and single workspace transport toolbar placed before field/inspector for mobile usability.

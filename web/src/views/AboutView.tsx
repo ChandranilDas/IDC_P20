@@ -179,10 +179,10 @@ export const AboutView: React.FC = () => {
             Custom seeds generate independent pseudorandom initial configurations across different grid sizes and dimensions.
           </li>
           <li>
-            <strong>Observation Windows & Extended Trajectories:</strong> In the interactive Simulation Lab, observation durations
-            (<code>t = 40</code> in 1D, <code>t = 25</code> in 2D) are bounded to maintain responsive client-side performance under the
-            50,000,000 cell-step work budget. Extended trajectories (<code>t = 1000</code> in 1D, <code>t = 100</code> in 2D) are provided
-            in Saved Results to examine late-stage domain coarsening and optional spectral diagnostics.
+            <strong>Observation Windows & Extended Trajectories:</strong> The interactive Simulation Lab imposes no artificial duration or
+            work cap; simulations are bounded only by client hardware runtime and memory limits. Default presets (<code>t = 40</code> in 1D,
+            <code>t = 25</code> in 2D) provide rapid interactive feedback, while extended reference trajectories (<code>t = 1000</code> in 1D,
+            <code>t = 100</code> in 2D) are provided in Saved Results to examine late-stage domain coarsening and optional spectral diagnostics.
           </li>
           <li>
             <strong>Explicit Timestep & Monotonicity Constraints:</strong> Explicit Forward Euler does not provide an unconditional nonlinear

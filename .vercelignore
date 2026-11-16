@@ -47,3 +47,5 @@ yarn-error.log*
 Project20/
 submission_history/
 .git/
+
+Project20*.zip

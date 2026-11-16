@@ -32,6 +32,21 @@ interface SnapshotRecord {
   diagnostics: Diagnostics;
 }
 
+function pruneSnapshots(list: SnapshotRecord[], limit: number): SnapshotRecord[] {
+  let curr = list;
+  while (curr.length > limit && curr.length > 2) {
+    const first = curr[0];
+    const last = curr[curr.length - 1];
+    const interior = curr.slice(1, -1);
+    const thinned = interior.filter((_, idx) => idx % 2 === 1);
+    curr = [first, ...thinned, last];
+  }
+  if (curr.length > limit && limit === 2) {
+    curr = [curr[0], curr[curr.length - 1]];
+  }
+  return curr;
+}
+
 interface ActiveDisplayBundle {
   runId: string;
   config: SimulationConfig;
@@ -67,6 +82,7 @@ export const SimulationLab: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'running' | 'paused' | 'completed'>('idle');
   const [snapshots, setSnapshots] = useState<SnapshotRecord[]>([]);
   const [activeSnapshotIdx, setActiveSnapshotIdx] = useState<number>(0);
+  const [workerError, setWorkerError] = useState<string | null>(null);
 
   // Inspector point coordinates
   const [selectedI, setSelectedI] = useState<number>(512);
@@ -101,6 +117,9 @@ export const SimulationLab: React.FC = () => {
       pairR0: draftPairR0,
     });
   }, [dimension, draftL, draftN, draftDt, draftDuration, draftSeed, draftNoiseAmplitude, draftPhi0, preset, draftPairR0]);
+
+  // Do not allocate large fields automatically while a user is still editing parameters.
+  const deferPreview = (valResult.budget?.estimatedMemoryMb ?? 0) > 256;
 
   const provenance = useMemo(() => {
     if (valResult.config) {
@@ -139,10 +158,11 @@ export const SimulationLab: React.FC = () => {
 
   const isFormLocked = status === 'running' || status === 'paused';
 
-  // Preset switch handler (All default presets calibrated to stay strictly within 50M cell-steps)
+  // Preset switch handler (All default presets calibrated for responsive live interaction)
   const applyPreset = (name: string, targetDim?: 1 | 2) => {
     setPreset(name);
     setStatus('idle');
+    setWorkerError(null);
     setDisplayBundle(null);
     setSnapshots([]);
     setActiveSnapshotIdx(0);
@@ -232,6 +252,13 @@ export const SimulationLab: React.FC = () => {
         return;
       }
 
+      if (msg.type === 'ERROR') {
+        autoStartOnNextInitRef.current = false;
+        setStatus('idle');
+        setWorkerError(msg.message || 'Worker runtime error');
+        return;
+      }
+
       const cfg = activeConfigRef.current;
       if (!cfg) return;
       const expectedTotal = cfg.dimension === 1 ? cfg.Nx : cfg.Nx * cfg.Ny;
@@ -262,19 +289,19 @@ export const SimulationLab: React.FC = () => {
         });
         if (msg.isSnapshot) {
           setSnapshots((prev) => {
-            let nextList = [
-              ...prev,
-              {
-                time: msg.diagnostics.time,
-                step: msg.diagnostics.step,
-                field: msg.field,
-                diagnostics: msg.diagnostics,
-              },
-            ];
-            // Enforce bounded snapshot history cap
-            if (nextList.length > MAX_SNAPSHOTS) {
-              nextList = [nextList[0], ...nextList.slice(1).filter((_, idx) => idx % 2 === 1)];
-            }
+            const snapLimit = valResultRef.current.budget?.snapshotLimit ?? MAX_SNAPSHOTS;
+            const nextList = pruneSnapshots(
+              [
+                ...prev,
+                {
+                  time: msg.diagnostics.time,
+                  step: msg.diagnostics.step,
+                  field: msg.field,
+                  diagnostics: msg.diagnostics,
+                },
+              ],
+              snapLimit
+            );
             setActiveSnapshotIdx(nextList.length - 1);
             return nextList;
           });
@@ -299,18 +326,19 @@ export const SimulationLab: React.FC = () => {
             diagnostics: msg.diagnostics,
           });
           setSnapshots((prev) => {
-            let nextList = [
-              ...prev,
-              {
-                time: msg.diagnostics.time,
-                step: msg.diagnostics.step,
-                field: msg.field,
-                diagnostics: msg.diagnostics,
-              },
-            ];
-            if (nextList.length > MAX_SNAPSHOTS) {
-              nextList = [nextList[0], ...nextList.slice(1).filter((_, idx) => idx % 2 === 1)];
-            }
+            const snapLimit = valResultRef.current.budget?.snapshotLimit ?? MAX_SNAPSHOTS;
+            const nextList = pruneSnapshots(
+              [
+                ...prev,
+                {
+                  time: msg.diagnostics.time,
+                  step: msg.diagnostics.step,
+                  field: msg.field,
+                  diagnostics: msg.diagnostics,
+                },
+              ],
+              snapLimit
+            );
             setActiveSnapshotIdx(nextList.length - 1);
             return nextList;
           });
@@ -318,6 +346,12 @@ export const SimulationLab: React.FC = () => {
       } else if (msg.type === 'RESET_ACK') {
         setStatus('idle');
       }
+    };
+
+    worker.onerror = (e: ErrorEvent) => {
+      autoStartOnNextInitRef.current = false;
+      setStatus('idle');
+      setWorkerError(e.message || 'Worker runtime error');
     };
 
     return () => {
@@ -330,6 +364,7 @@ export const SimulationLab: React.FC = () => {
     const vr = valResultRef.current;
     if (!workerRef.current || !vr.isValid || !vr.config) return;
 
+    setWorkerError(null);
     const newId = `run_${Date.now()}_${++runCounter}_${Math.random().toString(36).substring(2, 7)}`;
     runIdRef.current = newId;
     activeConfigRef.current = vr.config;
@@ -348,8 +383,16 @@ export const SimulationLab: React.FC = () => {
 
   // Auto-init strictly when draft parameters change while idle
   useEffect(() => {
-    if (status === 'idle' && valResult.isValid) {
-      initSimulation();
+    if (status === 'idle' && valResult.isValid && !workerError) {
+      if (deferPreview && !autoStartOnNextInitRef.current) {
+        workerRef.current?.postMessage({ type: 'RESET', runId: runIdRef.current } as WorkerInMessage);
+        setDisplayBundle(null);
+        setSnapshots([]);
+        setActiveConfig(null);
+        activeConfigRef.current = null;
+      } else {
+        initSimulation();
+      }
     }
   }, [
     dimension,
@@ -369,7 +412,13 @@ export const SimulationLab: React.FC = () => {
 
   // Simulation Controls
   const handleStart = () => {
-    if (!valResult.isValid || !displayBundle) return;
+    if (!valResult.isValid || workerError) return;
+    if (!displayBundle && deferPreview && status === 'idle') {
+      autoStartOnNextInitRef.current = true;
+      initSimulation();
+      return;
+    }
+    if (!displayBundle) return;
     if (status === 'idle') {
       setStatus('running');
       workerRef.current?.postMessage({ type: 'START', runId: runIdRef.current } as WorkerInMessage);
@@ -394,11 +443,12 @@ export const SimulationLab: React.FC = () => {
 
   const handleReset = () => {
     setStatus('idle');
+    setWorkerError(null);
     setDisplayBundle(null);
     setSnapshots([]);
     setActiveSnapshotIdx(0);
     workerRef.current?.postMessage({ type: 'RESET', runId: runIdRef.current } as WorkerInMessage);
-    initSimulation();
+    if (!deferPreview) initSimulation();
   };
 
   // Timeline seeking
@@ -757,7 +807,7 @@ export const SimulationLab: React.FC = () => {
                   </div>
                   <div>
                     <label htmlFor="input-noise" className="param-label" style={{ marginBottom: '2px' }}>
-                      Noise |δφ| ≤ 0.5
+                      Noise amplitude |δφ|
                     </label>
                     <input
                       id="input-noise"
@@ -797,6 +847,20 @@ export const SimulationLab: React.FC = () => {
                 </div>
               ))}
 
+              {/* Worker Error Box */}
+              {deferPreview && !displayBundle && !workerError && (
+                <div className="notice-box">Large grid: press Start to allocate memory and run. Initialization may take time on this device.</div>
+              )}
+              {workerError && (
+                <div className="notice-box notice-error">
+                  <div style={{ fontWeight: 600 }}>Simulation Run Error</div>
+                  <div style={{ marginTop: '2px', fontSize: '0.75rem' }}>{workerError}</div>
+                  <div style={{ marginTop: '4px', fontSize: '0.72rem', color: 'var(--ink-secondary)' }}>
+                    Execution halted. Click <strong>Reset</strong> to clear the error and reinitialize.
+                  </div>
+                </div>
+              )}
+
               {/* Stability Bound & Budget Information */}
               {valResult.errors.length > 0 ? (
                 <div className="notice-box notice-error">
@@ -821,8 +885,8 @@ export const SimulationLab: React.FC = () => {
                     </div>
                   )}
                   <div style={{ color: 'var(--ink-secondary)', marginTop: '3px' }}>
-                    Satisfied ({valResult.budget?.safetyRatio.toFixed(1)}% of monotonicity bound). Budget:{' '}
-                    {valResult.budget?.cellSteps.toLocaleString()} cell-steps (≤ 50M cap).
+                    Satisfied ({valResult.budget?.safetyRatio.toFixed(1)}% of monotonicity bound). Work estimate:{' '}
+                    {valResult.budget?.cellSteps.toLocaleString()} cell-steps · Est. Memory: ~{valResult.budget?.estimatedMemoryMb.toFixed(1)} MB ({valResult.budget?.snapshotLimit} snapshots).
                   </div>
                 </div>
               )}
@@ -878,7 +942,7 @@ export const SimulationLab: React.FC = () => {
                 </span>
                 <span style={{ fontSize: '0.72rem', color: 'var(--ink-muted)' }}>·</span>
                 <span style={{ fontSize: '0.75rem', color: 'var(--ink-secondary)' }}>
-                  State: <strong style={{ color: status === 'running' ? 'var(--forest)' : 'var(--ink-primary)', textTransform: 'capitalize' }}>{status}</strong>
+                  State: <strong style={{ color: workerError ? 'var(--burgundy)' : status === 'running' ? 'var(--forest)' : 'var(--ink-primary)', textTransform: 'capitalize' }}>{workerError ? 'error (idle)' : status}</strong>
                 </span>
                 {isFormLocked && (
                   <span style={{ fontSize: '0.72rem', color: 'var(--ink-muted)', fontStyle: 'italic' }}>
@@ -901,7 +965,7 @@ export const SimulationLab: React.FC = () => {
                     className="btn btn-primary btn-sm"
                     style={{ minWidth: '85px' }}
                     onClick={handleStart}
-                    disabled={!valResult.isValid || !displayBundle}
+                    disabled={!valResult.isValid || (!displayBundle && !deferPreview) || !!workerError}
                   >
                     <Play size={13} /> {status === 'paused' ? 'Resume' : status === 'completed' ? 'Run Again' : 'Start'}
                   </button>
@@ -909,7 +973,7 @@ export const SimulationLab: React.FC = () => {
                 <button
                   className="btn btn-secondary btn-sm"
                   onClick={handleStepOnce}
-                  disabled={status === 'running' || !valResult.isValid}
+                  disabled={status === 'running' || !valResult.isValid || !displayBundle || !!workerError}
                   title="Single Forward Euler Step"
                   aria-label="Single Step"
                 >

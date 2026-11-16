@@ -5,11 +5,12 @@
  * Enforces:
  * - Strict non-empty, suffix-free parsing (rejects blank, letters, trailing chars)
  * - Strict uint32 integer range [0, 4294967295] for seed
- * - Positive finite system size L > 0, grid size N in [16, 2048] (1D) or [16, 256] (2D)
- * - Derived quantities (dx, 1/dx^2, cell count) validated finite and positive
- * - Initial bias |φ₀| <= 1.0 and noise |δφ| <= 0.5
+ * - Positive finite system size L > 0, grid size N >= 3 (minimum 2nd-order central differences)
+ * - Safe integer and typed-array representability for total grid cells
+ * - Non-negative noise amplitude |δφ| >= 0
  * - Conservative monotonicity bound: dt <= 1 / [ 3*M² - 1 + 2*D/dx² ], where M = max(1, |effective_bias| + eta)
- * - Work budget cap: cell-steps <= 50,000,000 (50M cap)
+ * - Memory & budget estimation: snapshotLimit chosen by 64 MiB history target clamped to [2, 300]
+ * - Informative work estimation and warnings for high computational load (> 50M cell-steps) without artificial rejection
  * - Exact duration rounding semantics: totalSteps = Math.ceil(duration / dt), actualDuration = totalSteps * dt
  */
 
@@ -33,11 +34,14 @@ export interface WorkBudgetInfo {
   totalSteps: number;
   cellSteps: number;
   actualDuration: number;
-  stabilityLimit: number; // Backward-compatible alias for sufficientMonotonicityLimit
+  stabilityLimit: number; // Conservative sufficient monotonicity bound
   safetyRatio: number;
   sufficientMonotonicityLimit: number; // Conservative sufficient bound for discrete energy dissipation
   linearStabilityLimit: number;        // Ordered-state linear stability limit (Yadav et al. 2024 Eq. 35)
   linearSafetyRatio: number;
+  snapshotLimit: number;               // Dynamic snapshot retention limit clamped to [2, 300] targeting 64 MiB
+  estimatedMemoryBytes: number;        // Estimated memory for active arrays + retained snapshot history
+  estimatedMemoryMb: number;           // Estimated memory footprint in megabytes
 }
 
 export interface ValidationResult {
@@ -48,8 +52,8 @@ export interface ValidationResult {
   budget: WorkBudgetInfo | null;
 }
 
-export const MAX_CELL_STEPS = 50_000_000; // 50 million cell-steps budget cap
-export const MAX_SNAPSHOTS = 300;         // strict bounded memory cap
+export const MAX_CELL_STEPS = 50_000_000; // Informational threshold for large workload warning
+export const MAX_SNAPSHOTS = 300;         // Upper clamping bound for snapshot history
 
 function parseStrictNumber(val: number | string, name: string): { num: number; error?: string } {
   if (typeof val === 'string') {
@@ -104,14 +108,8 @@ export function validateSimulationConfig(raw: RawConfigInput): ValidationResult 
   const nRes = parseStrictInteger(raw.N, 'Grid size N');
   if (nRes.error) {
     errors.push(nRes.error);
-  } else if (nRes.num < 16) {
-    errors.push('Grid size N must be an integer ≥ 16.');
-  } else {
-    if (raw.dimension === 1 && nRes.num > 2048) {
-      errors.push('1D Grid size N cannot exceed 2048 (memory budget limit).');
-    } else if (raw.dimension === 2 && nRes.num > 256) {
-      errors.push('2D Grid size N cannot exceed 256 (256×256 = 65,536 cells budget limit).');
-    }
+  } else if (nRes.num < 3) {
+    errors.push('Grid size N must be an integer ≥ 3 (minimum grid for 2nd-order central differences with periodic boundaries).');
   }
   const N = nRes.num;
 
@@ -124,14 +122,12 @@ export function validateSimulationConfig(raw: RawConfigInput): ValidationResult 
   }
   const seed = sRes.num;
 
-  // Parse noise amplitude
+  // Parse noise amplitude (must be non-negative)
   const etaRes = parseStrictNumber(raw.noiseAmplitude, 'Noise amplitude |δφ|');
   if (etaRes.error) {
     errors.push(etaRes.error);
   } else if (etaRes.num < 0) {
     errors.push('Noise amplitude |δφ| must be non-negative.');
-  } else if (etaRes.num > 0.5) {
-    errors.push('Noise amplitude |δφ| cannot exceed 0.5 (safe amplitude guard against immediate blowup).');
   }
   const eta = etaRes.num;
 
@@ -139,8 +135,6 @@ export function validateSimulationConfig(raw: RawConfigInput): ValidationResult 
   const phiRes = parseStrictNumber(raw.phi0, 'Initial order parameter φ₀');
   if (phiRes.error) {
     errors.push(phiRes.error);
-  } else if (Math.abs(phiRes.num) > 1.0) {
-    errors.push('Initial order parameter |φ₀| cannot exceed 1.0 (physical double-well domain bounds).');
   }
   const phi0 = phiRes.num;
 
@@ -202,6 +196,10 @@ export function validateSimulationConfig(raw: RawConfigInput): ValidationResult 
   }
 
   const totalCells = raw.dimension === 1 ? N : N * N;
+  if (!Number.isSafeInteger(totalCells) || totalCells <= 0 || totalCells > Number.MAX_SAFE_INTEGER / 8) {
+    errors.push('Grid storage size cannot be represented safely by this JavaScript runtime.');
+    return { isValid: false, errors, warnings, config: null, budget: null };
+  }
 
   // Effective peak amplitude M for nonlinear monotonicity bound
   let effectiveBias = 0.0;
@@ -211,6 +209,8 @@ export function validateSimulationConfig(raw: RawConfigInput): ValidationResult 
     effectiveBias = -1.0;
   } else if (raw.preset === 'kink_pair') {
     effectiveBias = 1.0;
+  } else if (raw.preset === 'biased') {
+    effectiveBias = phi0;
   } else {
     effectiveBias = phi0;
   }
@@ -221,6 +221,21 @@ export function validateSimulationConfig(raw: RawConfigInput): ValidationResult 
   const sufficientMonotonicityLimit = 1.0 / denom;
   const linearStabilityLimit = (dx * dx) / (dx * dx + 2.0 * raw.dimension);
   const stabilityLimit = sufficientMonotonicityLimit;
+  if (!Number.isFinite(denom) || !Number.isFinite(M) || !(stabilityLimit > 0)) {
+    errors.push('The derived amplitude or time-step bound cannot be represented in floating-point arithmetic.');
+    return { isValid: false, errors, warnings, config: null, budget: null };
+  }
+
+  if (
+    !Number.isFinite(M) ||
+    !Number.isFinite(denom) ||
+    denom <= 0 ||
+    !Number.isFinite(sufficientMonotonicityLimit) ||
+    sufficientMonotonicityLimit <= 0
+  ) {
+    errors.push('Derived monotonicity stability bound overflowed finite numeric bounds.');
+    return { isValid: false, errors, warnings, config: null, budget: null };
+  }
 
   if (dt > stabilityLimit) {
     errors.push(
@@ -234,6 +249,10 @@ export function validateSimulationConfig(raw: RawConfigInput): ValidationResult 
 
   // Exact duration rounding semantics
   const totalSteps = Math.ceil(duration / dt);
+  if (!Number.isSafeInteger(totalSteps) || totalSteps <= 0) {
+    errors.push('Total integration step count exceeds safe integer representation limits.');
+    return { isValid: false, errors, warnings, config: null, budget: null };
+  }
   const actualDuration = totalSteps * dt;
   if (Math.abs(actualDuration - duration) > 1e-10) {
     warnings.push(
@@ -245,8 +264,26 @@ export function validateSimulationConfig(raw: RawConfigInput): ValidationResult 
 
   const cellSteps = totalSteps * totalCells;
   if (cellSteps > MAX_CELL_STEPS) {
-    errors.push(
-      `Computational budget exceeded: ${cellSteps.toLocaleString()} cell-steps requested (limit is ${MAX_CELL_STEPS.toLocaleString()} for live browser worker). Decrease duration or increase Δt/grid spacing.`
+    warnings.push(
+      `High computational workload: ${cellSteps.toLocaleString()} cell-steps requested. Execution may take extended time in the browser.`
+    );
+  }
+
+  // Memory & snapshot limit estimation (64 MiB snapshot history target clamped to [2, 300])
+  const bytesPerCell = 8; // Float64Array element
+  const bytesPerSnapshot = totalCells * bytesPerCell;
+  const historyTargetBytes = 64 * 1024 * 1024; // 64 MiB
+  const rawSnapshotLimit = Math.floor(historyTargetBytes / bytesPerSnapshot);
+  const snapshotLimit = Math.max(2, Math.min(300, rawSnapshotLimit));
+
+  // Estimate total memory: 3 active arrays (worker current, worker scratch, UI display) + retained snapshots
+  const activeArrays = 3;
+  const estimatedMemoryBytes = (activeArrays + snapshotLimit) * bytesPerSnapshot;
+  const estimatedMemoryMb = estimatedMemoryBytes / (1024 * 1024);
+
+  if (estimatedMemoryMb > 500) {
+    warnings.push(
+      `High estimated memory footprint (~${estimatedMemoryMb.toFixed(1)} MB). Ensure adequate system memory is available.`
     );
   }
 
@@ -279,6 +316,9 @@ export function validateSimulationConfig(raw: RawConfigInput): ValidationResult 
     sufficientMonotonicityLimit,
     linearStabilityLimit,
     linearSafetyRatio,
+    snapshotLimit,
+    estimatedMemoryBytes,
+    estimatedMemoryMb,
   };
 
   return {
