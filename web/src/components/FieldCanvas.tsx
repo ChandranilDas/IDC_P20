@@ -261,17 +261,75 @@ export const FieldCanvas: React.FC<FieldCanvasProps> = ({
         ctx.stroke();
 
         // Tooltip badge
-        const text = `i=${selectedI} (x=${(selectedI * dx).toFixed(2)}): φ=${field[selectedI].toFixed(4)}`;
-        ctx.font = '11px "SF Mono", monospace';
-        const tw = ctx.measureText(text).width;
-        const bx = Math.min(Math.max(bounds.plotX, cx - tw / 2), width - bounds.paddingRight - tw);
-        const by = cy > bounds.plotY + 30 ? cy - 24 : cy + 14;
+        ctx.save();
+        ctx.font = '12px "SF Mono", Menlo, Consolas, monospace';
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'center';
 
+        const singleText = `i=${selectedI} (x=${(selectedI * dx).toFixed(2)}): φ=${field[selectedI].toFixed(4)}`;
+        const twSingle = ctx.measureText(singleText).width;
+        const paddingX = 8;
+        const singleBadgeW = twSingle + paddingX * 2;
+
+        let badgeW: number;
+        let badgeH: number;
+        let lines: string[];
+
+        // Use two lines if the single line exceeds the plot width
+        if (singleBadgeW > bounds.plotW) {
+          const line1 = `i=${selectedI} (x=${(selectedI * dx).toFixed(2)})`;
+          const line2 = `φ=${field[selectedI].toFixed(4)}`;
+          const tw1 = ctx.measureText(line1).width;
+          const tw2 = ctx.measureText(line2).width;
+          lines = [line1, line2];
+          badgeW = Math.min(bounds.plotW, Math.max(tw1, tw2) + paddingX * 2);
+          badgeH = 38;
+        } else {
+          lines = [singleText];
+          badgeW = singleBadgeW;
+          badgeH = 26;
+        }
+
+        // Horizontal positioning: center badge on cx, clamped inside plot bounds on left and right
+        let bx = cx - badgeW / 2;
+        bx = Math.max(bounds.plotX, Math.min(bx, bounds.plotX + bounds.plotW - badgeW));
+
+        // Vertical positioning: place above point if it fits, otherwise below point; clamp inside plot bounds
+        const gap = 8;
+        let by: number;
+        if (cy - gap - badgeH >= bounds.plotY) {
+          by = cy - gap - badgeH;
+        } else if (cy + gap + badgeH <= bounds.plotY + bounds.plotH) {
+          by = cy + gap;
+        } else {
+          by = cy - gap - badgeH < bounds.plotY ? cy + gap : cy - gap - badgeH;
+          by = Math.max(bounds.plotY, Math.min(by, bounds.plotY + bounds.plotH - badgeH));
+        }
+
+        // Draw dark badge background
         ctx.fillStyle = 'rgba(32, 36, 31, 0.92)';
-        ctx.fillRect(bx - 4, by - 12, tw + 8, 18);
+        if (typeof ctx.roundRect === 'function') {
+          ctx.beginPath();
+          ctx.roundRect(bx, by, badgeW, badgeH, 4);
+          ctx.fill();
+        } else {
+          ctx.fillRect(bx, by, badgeW, badgeH);
+        }
+
+        // Draw white 12px text centered in badge
         ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'left';
-        ctx.fillText(text, bx, by);
+        const centerX = bx + badgeW / 2;
+        if (lines.length === 1) {
+          const centerY = by + badgeH / 2;
+          ctx.fillText(lines[0], centerX, centerY);
+        } else {
+          const lineSpacing = 14;
+          const startY = by + badgeH / 2 - lineSpacing / 2;
+          ctx.fillText(lines[0], centerX, startY);
+          ctx.fillText(lines[1], centerX, startY + lineSpacing);
+        }
+
+        ctx.restore();
       }
     },
     [field, Nx, L, dx, selectedI]
